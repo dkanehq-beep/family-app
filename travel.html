@@ -57,7 +57,11 @@
             <div id="pick-map"></div>
             <div class="form-group">
                 <label>날짜</label>
-                <input type="date" id="trip-date" required>
+                <div class="hybrid-input">
+                    <input type="text" id="trip-date" inputmode="numeric" placeholder="예: 2026-03-15" required>
+                    <button type="button" class="hybrid-pick-btn" data-for="trip-date-native" aria-label="달력에서 선택">📅</button>
+                </div>
+                <input type="date" id="trip-date-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
             </div>
             <div class="form-group">
                 <label>메모 (선택)</label>

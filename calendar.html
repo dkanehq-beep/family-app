@@ -63,7 +63,11 @@
         <form id="event-form">
             <div class="form-group">
                 <label>날짜</label>
-                <input type="date" id="event-date" required>
+                <div class="hybrid-input">
+                    <input type="text" id="event-date" inputmode="numeric" placeholder="예: 2026-03-15" required>
+                    <button type="button" class="hybrid-pick-btn" data-for="event-date-native" aria-label="달력에서 선택">📅</button>
+                </div>
+                <input type="date" id="event-date-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
             </div>
             <div class="form-group">
                 <label>제목</label>
@@ -71,7 +75,15 @@
             </div>
             <div class="form-group">
                 <label>시간 (선택)</label>
-                <input type="time" id="event-time">
+                <div class="hybrid-input">
+                    <input type="text" id="event-time" list="time-suggestions" inputmode="numeric" placeholder="예: 18:30">
+                    <button type="button" class="hybrid-pick-btn" data-for="event-time-native" aria-label="시간 선택">🕐</button>
+                </div>
+                <input type="time" id="event-time-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
+                <datalist id="time-suggestions">
+                    <option value="09:00"><option value="10:00"><option value="12:00">
+                    <option value="14:00"><option value="18:00"><option value="19:00"><option value="20:00">
+                </datalist>
             </div>
             <div class="form-group">
                 <label>메모 (선택)</label>

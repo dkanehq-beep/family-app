@@ -694,13 +694,39 @@ a { color: inherit; }
     appearance: none;
 }
 .form-group textarea { height: auto; padding: 12px 14px; line-height: 1.5; }
-.form-group input[type="date"], .form-group input[type="time"] {
-    -webkit-appearance: none;
-    appearance: none;
-}
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(201, 102, 58, 0.1);
+}
+
+/* ✨ 직접 입력 + 네이티브 선택기 하이브리드 (날짜/시간) */
+.hybrid-input { position: relative; }
+.hybrid-input input[type="text"] { padding-right: 44px; }
+.hybrid-pick-btn {
+    position: absolute;
+    right: 5px; top: 50%;
+    transform: translateY(-50%);
+    width: 36px; height: 36px;
+    border: none;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.hybrid-pick-btn:hover { background: rgba(201, 102, 58, 0.16); }
+.hybrid-pick-btn:active { transform: translateY(-50%) scale(0.9); }
+.native-picker-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    border: none;
 }
 .modal-actions {
     display: flex;

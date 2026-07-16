@@ -9,6 +9,9 @@ calMonth = today.getMonth();
 function pad2(n) { return String(n).padStart(2, "0"); }
 function dateKey(y, m, d) { return `${y}-${pad2(m + 1)}-${pad2(d)}`; }
 
+bindHybridPicker("event-date", "event-date-native", '[data-for="event-date-native"]');
+bindHybridPicker("event-time", "event-time-native", '[data-for="event-time-native"]');
+
 function renderCalendar() {
     document.getElementById("cal-month-label").textContent = `${calYear}년 ${calMonth + 1}월`;
 
@@ -92,6 +95,7 @@ const eventForm = document.getElementById("event-form");
 function openEventModal(dateStr) {
     selectedDate = dateStr;
     document.getElementById("event-date").value = dateStr;
+    document.getElementById("event-date-native").value = dateStr;
     document.getElementById("event-modal-title").textContent = formatDateShort(dateStr) + " 일정";
 
     const dayEvents = allEvents.filter(function(ev) { return ev.date === dateStr; });

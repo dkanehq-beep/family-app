@@ -68,3 +68,26 @@ function formatDateShort(dateStr) {
     const parts = dateStr.split("-");
     return `${Number(parts[1])}월 ${Number(parts[2])}일`;
 }
+
+// ✨ 직접 타이핑 + 네이티브 선택기(달력/시계) 둘 다 되는 하이브리드 입력
+// textId: 눈에 보이는 텍스트 입력창 / nativeId: 숨겨진 type=date,time 입력창 / btnSelector: 선택 버튼
+function bindHybridPicker(textId, nativeId, btnSelector) {
+    const textInput = document.getElementById(textId);
+    const nativeInput = document.getElementById(nativeId);
+    const btn = document.querySelector(btnSelector);
+    if (!textInput || !nativeInput) return;
+
+    if (btn) {
+        btn.addEventListener("click", function() {
+            if (nativeInput.showPicker) {
+                try { nativeInput.showPicker(); } catch (e) { nativeInput.focus(); }
+            } else {
+                nativeInput.focus();
+            }
+        });
+    }
+
+    nativeInput.addEventListener("change", function() {
+        textInput.value = nativeInput.value;
+    });
+}

@@ -9,6 +9,8 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
+bindHybridPicker("trip-date", "trip-date-native", '[data-for="trip-date-native"]');
+
 // ✨ 메인 지도 (전체 여행 핀)
 function initMainMap() {
     mainMap = L.map("travel-map").setView([20, 30], 2);
