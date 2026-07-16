@@ -7,7 +7,7 @@
     --blue: #4f7d8c;
     --deep: #2c2420;
     --bg-main: #faf6f1;
-    --card-bg: #ffffff;
+    --card-bg: #fffdfb;
     --text-main: #2c2420;
     --text-muted: #8d7d70;
     --border-light: rgba(44, 36, 32, 0.09);
@@ -23,6 +23,7 @@
     box-sizing: border-box;
     font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
     letter-spacing: -0.01em;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .serif, .login-card h1, .topbar-logo span, .page-title, .home-hero h1,
@@ -228,6 +229,7 @@ a { color: inherit; }
     transform: translateY(-2px);
     box-shadow: 0 14px 32px rgba(201, 102, 58, 0.4);
 }
+.login-btn:active { transform: scale(0.98); box-shadow: 0 6px 16px rgba(201, 102, 58, 0.3); }
 .login-btn:disabled { opacity: 0.6; cursor: default; transform: none; }
 .login-error {
     display: none;
@@ -247,6 +249,7 @@ a { color: inherit; }
     margin-top: 20px;
 }
 .login-toggle-link:hover { color: var(--primary); }
+.login-toggle-link:active { opacity: 0.6; }
 
 /* ===== 상단 네비게이션 ===== */
 .topbar {
@@ -303,6 +306,7 @@ a { color: inherit; }
     background: var(--primary-light);
     font-weight: 700;
 }
+.topbar-nav a:active { background: rgba(201, 102, 58, 0.16); }
 .logout-btn {
     background: none;
     border: 1px solid var(--border-light);
@@ -314,6 +318,7 @@ a { color: inherit; }
     transition: all 0.2s;
 }
 .logout-btn:hover { border-color: var(--primary); color: var(--primary); }
+.logout-btn:active { transform: scale(0.95); }
 
 @media (max-width: 640px) {
     .topbar { flex-wrap: wrap; gap: 10px; }
@@ -389,6 +394,7 @@ a { color: inherit; }
     display: block;
 }
 .dash-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--border-accent); }
+.dash-card:active { transform: scale(0.97); transition-duration: 0.1s; }
 .dash-card-icon {
     width: 50px; height: 50px;
     border-radius: 14px;
@@ -415,6 +421,7 @@ a { color: inherit; }
     transition: all 0.25s;
 }
 .btn-primary:hover { background-color: var(--primary); }
+.btn-primary:active { transform: scale(0.97); transition-duration: 0.1s; }
 .btn-secondary {
     background: var(--card-bg);
     border: 1px solid var(--border-light);
@@ -427,6 +434,7 @@ a { color: inherit; }
     transition: all 0.25s;
 }
 .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+.btn-secondary:active { transform: scale(0.97); transition-duration: 0.1s; }
 
 /* ===== 캘린더 ===== */
 .cal-header {
@@ -447,6 +455,7 @@ a { color: inherit; }
     transition: all 0.2s;
 }
 .cal-nav-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+.cal-nav-btn:active { transform: scale(0.9); }
 .cal-grid {
     background: var(--card-bg);
     border: 1px solid var(--border-light);
@@ -476,8 +485,9 @@ a { color: inherit; }
     transition: background 0.2s;
 }
 .cal-day:hover { background: var(--primary-light); }
+.cal-day:active { background: rgba(201, 102, 58, 0.16); }
 .cal-day.empty { cursor: default; }
-.cal-day.empty:hover { background: none; }
+.cal-day.empty:hover, .cal-day.empty:active { background: none; }
 .cal-day.today { background: rgba(201, 102, 58, 0.09); }
 .cal-day-num { font-size: 12px; font-weight: 600; color: var(--text-muted); }
 .cal-day.today .cal-day-num { color: var(--primary); font-weight: 800; }
@@ -537,6 +547,7 @@ a { color: inherit; }
     flex-shrink: 0;
 }
 .event-item-del:hover { color: #b3492f; }
+.event-item-del:active { opacity: 0.5; }
 .empty-hint {
     text-align: center;
     color: var(--text-muted);
@@ -572,6 +583,7 @@ a { color: inherit; }
     transition: transform 0.35s cubic-bezier(0.25,1,0.5,1), box-shadow 0.35s;
 }
 .trip-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.trip-card:active { transform: scale(0.97); transition-duration: 0.1s; }
 .trip-card-img {
     width: 100%;
     height: 160px;
@@ -600,6 +612,7 @@ a { color: inherit; }
     transition: all 0.25s;
 }
 .board-item:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+.board-item:active { transform: scale(0.98); transition-duration: 0.1s; }
 .board-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
 .board-item .meta { font-size: 11px; color: var(--text-muted); }
 .board-item .preview { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; font-weight: 300; }
@@ -755,3 +768,4 @@ a { color: inherit; }
     z-index: 90;
 }
 .fab:hover { background: var(--primary); transform: translateY(-2px) scale(1.04); }
+.fab:active { transform: scale(0.92); transition-duration: 0.1s; }
