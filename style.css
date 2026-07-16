@@ -41,6 +41,18 @@ body {
         radial-gradient(circle at 92% 0%, rgba(184, 147, 90, 0.10) 0%, transparent 42%),
         radial-gradient(circle at 0% 100%, rgba(79, 125, 140, 0.06) 0%, transparent 42%);
     background-attachment: fixed;
+    position: relative;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2000;
+    opacity: 0.035;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%222%22 stitchTiles=%22stitch%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/></svg>");
 }
 
 a { color: inherit; }
@@ -57,77 +69,107 @@ a { color: inherit; }
     align-items: center;
     justify-content: center;
     padding: 20px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, #241713 0%, #4a2818 45%, #c9663a 100%);
+}
+.login-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -60px;
+    background: url('icon-source.avif') center 20%/cover no-repeat;
+    filter: blur(46px) brightness(0.5) saturate(1.15);
+    transform: scale(1.2);
+    z-index: 0;
+}
+.login-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(195deg, rgba(36, 23, 19, 0.35) 0%, rgba(36, 23, 19, 0.72) 75%);
+    z-index: 0;
 }
 .login-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-light);
-    border-radius: 26px;
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 253, 249, 0.86);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 28px;
     padding: 46px 34px;
     max-width: 380px;
     width: 100%;
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 30px 70px rgba(20, 10, 5, 0.45);
     text-align: center;
-    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 .login-emoji {
-    width: 68px;
-    height: 68px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
-    margin: 0 auto 20px auto;
+    margin: 0 auto 22px auto;
     background: linear-gradient(135deg, #e2935f, var(--primary));
-    box-shadow: 0 10px 24px rgba(201, 102, 58, 0.35);
+    box-shadow: 0 12px 28px rgba(201, 102, 58, 0.4), 0 0 0 4px rgba(255,255,255,0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 28px;
     overflow: hidden;
+    flex-shrink: 0;
 }
-.login-emoji img { width: 100%; height: 100%; object-fit: cover; }
+.login-emoji img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .login-card h1 {
-    font-size: 23px;
+    font-size: 25px;
     font-weight: 700;
-    margin-bottom: 10px;
+    margin-bottom: 11px;
     color: var(--deep);
 }
 .login-card p {
     font-size: 13px;
     color: var(--text-muted);
     margin-bottom: 30px;
-    line-height: 1.7;
+    line-height: 1.75;
     font-weight: 300;
 }
 .login-card input {
     width: 100%;
     padding: 14px 18px;
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
+    border: 1px solid rgba(44, 36, 32, 0.12);
+    border-radius: 13px;
     font-size: 14.5px;
     text-align: left;
-    background: var(--bg-main);
+    background: rgba(255, 255, 255, 0.7);
     color: var(--text-main);
     outline: none;
     margin-bottom: 12px;
-    transition: border-color 0.25s, box-shadow 0.25s;
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
 }
 .login-card input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(201, 102, 58, 0.1);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(201, 102, 58, 0.12);
 }
 .login-btn {
     width: 100%;
-    background-color: var(--deep);
+    background: linear-gradient(135deg, #4a2c1f, var(--deep));
     color: #fdf8f2;
     border: none;
     padding: 15px;
-    border-radius: 12px;
+    border-radius: 13px;
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.02em;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     margin-top: 6px;
+    box-shadow: 0 10px 24px rgba(44, 36, 32, 0.25);
 }
-.login-btn:hover { background-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.login-btn:hover {
+    background: linear-gradient(135deg, var(--primary), #d9814f);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(201, 102, 58, 0.4);
+}
 .login-btn:disabled { opacity: 0.6; cursor: default; transform: none; }
 .login-error {
     display: none;
@@ -156,10 +198,15 @@ a { color: inherit; }
     max-width: 900px;
     margin: 16px auto 0 auto;
     padding: 13px 22px;
-    background: var(--card-bg);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 20px;
     box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 12px;
+    z-index: 80;
 }
 .topbar-logo {
     display: flex;
@@ -237,17 +284,30 @@ a { color: inherit; }
 /* ===== 홈 대시보드 ===== */
 .home-hero {
     text-align: center;
-    padding: 34px 20px 6px 20px;
+    padding: 46px 28px;
+    margin-top: 24px;
+    border-radius: 24px;
+    background: linear-gradient(155deg, #3a231a 0%, #6b3a24 55%, var(--primary) 100%);
+    box-shadow: 0 20px 46px rgba(44, 24, 16, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+.home-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 85% 0%, rgba(255,255,255,0.14) 0%, transparent 50%);
 }
 .home-hero h1 {
+    position: relative;
     font-size: 25px;
     font-weight: 700;
     margin-bottom: 10px;
-    color: var(--deep);
+    color: #fdf8f2;
 }
 .home-hero p {
+    position: relative;
     font-size: 13.5px;
-    color: var(--text-muted);
+    color: rgba(253, 248, 242, 0.75);
     font-weight: 300;
 }
 .dash-grid {

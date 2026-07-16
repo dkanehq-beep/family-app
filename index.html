@@ -20,7 +20,7 @@
     <div class="login-card">
         <div class="login-emoji"><img src="icon-512.png" alt="우리 가족" onerror="this.parentElement.textContent='🏠'"></div>
         <h1>우리 가족</h1>
-        <p id="login-desc">가족 계정으로 로그인하고<br>일정 · 추억 · 소식을 함께 나눠요.</p>
+        <p id="login-desc">작은 순간들이 모여<br>우리 가족의 이야기가 됩니다.</p>
 
         <form id="login-form">
             <input type="email" id="login-email" placeholder="이메일" autocomplete="email" required>
@@ -65,8 +65,8 @@
         signupForm.style.display = mode === "signup" ? "block" : "none";
         toggleBtn.textContent = mode === "login" ? "계정이 없으신가요? 가입하기" : "이미 계정이 있으신가요? 로그인";
         descEl.innerHTML = mode === "login"
-            ? "가족 계정으로 로그인하고<br>일정 · 추억 · 소식을 함께 나눠요."
-            : "가족 초대 코드를 아는 분만<br>새 계정을 만들 수 있어요.";
+            ? "작은 순간들이 모여<br>우리 가족의 이야기가 됩니다."
+            : "가족 초대 코드를 아는 분만,<br>딱 우리끼리만 시작할 수 있어요.";
     });
 
     loginForm.addEventListener("submit", function(e) {
