@@ -25,6 +25,22 @@
         <form id="login-form">
             <input type="email" id="login-email" placeholder="이메일" autocomplete="email" required>
             <input type="password" id="login-password" placeholder="비밀번호" autocomplete="current-password" required>
+            <div class="login-options">
+                <label class="toggle-row">
+                    <span>아이디 기억하기</span>
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="remember-email">
+                        <span class="toggle-track"></span>
+                    </span>
+                </label>
+                <label class="toggle-row">
+                    <span>로그인 상태 유지</span>
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="stay-signed-in" checked>
+                        <span class="toggle-track"></span>
+                    </span>
+                </label>
+            </div>
             <button type="submit" class="login-btn" id="login-btn">로그인</button>
             <p class="login-error" id="login-error"></p>
         </form>
@@ -59,6 +75,13 @@
     const toggleBtn = document.getElementById("login-toggle");
     const descEl = document.getElementById("login-desc");
 
+    // ✨ 저장된 이메일 불러오기
+    const savedEmail = localStorage.getItem("saved_email");
+    if (savedEmail) {
+        document.getElementById("login-email").value = savedEmail;
+        document.getElementById("remember-email").checked = true;
+    }
+
     toggleBtn.addEventListener("click", function() {
         mode = mode === "login" ? "signup" : "login";
         loginForm.style.display = mode === "login" ? "block" : "none";
@@ -73,13 +96,28 @@
         e.preventDefault();
         const email = document.getElementById("login-email").value;
         const password = document.getElementById("login-password").value;
+        const rememberEmail = document.getElementById("remember-email").checked;
+        const staySignedIn = document.getElementById("stay-signed-in").checked;
         const errorEl = document.getElementById("login-error");
         const btn = document.getElementById("login-btn");
         errorEl.classList.remove("show");
         btn.disabled = true;
         btn.textContent = "확인 중...";
 
-        auth.signInWithEmailAndPassword(email, password)
+        if (rememberEmail) {
+            localStorage.setItem("saved_email", email);
+        } else {
+            localStorage.removeItem("saved_email");
+        }
+
+        const persistence = staySignedIn
+            ? firebase.auth.Auth.Persistence.LOCAL
+            : firebase.auth.Auth.Persistence.SESSION;
+
+        auth.setPersistence(persistence)
+            .then(function() {
+                return auth.signInWithEmailAndPassword(email, password);
+            })
             .then(function() {
                 window.location.href = "home.html";
             })
