@@ -42,6 +42,7 @@ body {
         radial-gradient(circle at 0% 100%, rgba(79, 125, 140, 0.06) 0%, transparent 42%);
     background-attachment: fixed;
     position: relative;
+    touch-action: manipulation;
 }
 
 body::after {
@@ -665,15 +666,24 @@ a { color: inherit; }
 }
 .form-group input, .form-group textarea, .form-group select {
     width: 100%;
-    padding: 11px 14px;
+    height: 46px;
+    padding: 0 14px;
     border: 1px solid var(--border-light);
     border-radius: 10px;
     font-size: 13px;
+    line-height: 46px;
     outline: none;
     background: var(--bg-main);
     color: var(--text-main);
     resize: vertical;
     transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.form-group textarea { height: auto; padding: 12px 14px; line-height: 1.5; }
+.form-group input[type="date"], .form-group input[type="time"] {
+    -webkit-appearance: none;
+    appearance: none;
 }
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
     border-color: var(--primary);
