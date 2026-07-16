@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>아이콘 만들기</title>
+<style>
+    body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #fffaf5; }
+    canvas { border-radius: 24px; box-shadow: 0 12px 32px rgba(61,43,31,0.18); margin-bottom: 20px; background: #eee; }
+    button { font-size: 16px; padding: 14px 28px; border-radius: 10px; border: none; background: #e8734a; color: #fff; cursor: pointer; margin: 6px; }
+    button:hover { background: #c85a35; }
+    p { color: #555; line-height: 1.6; }
+    .slider-wrap { max-width: 400px; margin: 0 auto 24px auto; }
+    input[type="range"] { width: 100%; }
+</style>
+</head>
+<body>
+<h2>👦👧 아이들 사진으로 아이콘 만들기</h2>
+<p>정사각형 미리보기예요. 슬라이더로 위/아래 위치를 맞춘 다음 다운로드하세요.</p>
+
+<canvas id="c" width="512" height="512"></canvas>
+
+<div class="slider-wrap">
+    <label>위/아래 위치 조절</label>
+    <input type="range" id="posSlider" min="0" max="100" value="30">
+</div>
+
+<div>
+    <button id="dl512">icon-512.png 다운로드</button>
+    <button id="dl180">icon-180.png 다운로드 (아이폰용)</button>
+</div>
+
+<script>
+    const img = new Image();
+    img.src = "icon-source.avif";
+
+    const previewCanvas = document.getElementById("c");
+    const previewCtx = previewCanvas.getContext("2d");
+    const slider = document.getElementById("posSlider");
+
+    function roundedRectPath(ctx, x, y, w, h, r) {
+        if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); return; }
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+    }
+
+    function drawIcon(ctx, size, posRatio) {
+        // 배경 (이미지 로드 전 대비)
+        roundedRectPath(ctx, 0, 0, size, size, size * 0.22);
+        ctx.save();
+        ctx.clip();
+        ctx.fillStyle = "#e8734a";
+        ctx.fillRect(0, 0, size, size);
+
+        const scale = size / img.width;
+        const scaledW = size;
+        const scaledH = img.height * scale;
+        const maxOffset = Math.max(0, scaledH - size);
+        const yOffset = maxOffset * (posRatio / 100);
+
+        ctx.drawImage(img, 0, -yOffset, scaledW, scaledH);
+
+        // 은은한 하단 그라데이션 (톤 정리)
+        const shadow = ctx.createLinearGradient(0, size * 0.7, 0, size);
+        shadow.addColorStop(0, "rgba(60,30,10,0)");
+        shadow.addColorStop(1, "rgba(60,30,10,0.18)");
+        ctx.fillStyle = shadow;
+        ctx.fillRect(0, 0, size, size);
+
+        ctx.restore();
+
+        // 테두리
+        roundedRectPath(ctx, size * 0.01, size * 0.01, size * 0.98, size * 0.98, size * 0.21);
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.lineWidth = size * 0.012;
+        ctx.stroke();
+    }
+
+    function renderPreview() {
+        previewCtx.clearRect(0, 0, 512, 512);
+        drawIcon(previewCtx, 512, Number(slider.value));
+    }
+
+    img.onload = renderPreview;
+    slider.addEventListener("input", renderPreview);
+
+    function downloadIcon(size, filename) {
+        const c = document.createElement("canvas");
+        c.width = size;
+        c.height = size;
+        const ctx = c.getContext("2d");
+        drawIcon(ctx, size, Number(slider.value));
+        const link = document.createElement("a");
+        link.download = filename;
+        link.href = c.toDataURL("image/png");
+        link.click();
+    }
+
+    document.getElementById("dl512").addEventListener("click", function() {
+        downloadIcon(512, "icon-512.png");
+    });
+    document.getElementById("dl180").addEventListener("click", function() {
+        downloadIcon(180, "icon-180.png");
+    });
+</script>
+</body>
+</html>
