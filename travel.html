@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 가족 | 여행 추억</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2246%22 fill=%22%23e8734a%22/><text x=%2250%22 y=%2266%22 font-size=%2250%22 text-anchor=%22middle%22>%F0%9F%8F%A0</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+
+<nav class="topbar">
+    <a href="home.html" class="topbar-logo">🏠 우리 가족</a>
+    <ul class="topbar-nav">
+        <li><a href="home.html">홈</a></li>
+        <li><a href="calendar.html">캘린더</a></li>
+        <li><a href="travel.html" class="active">여행 추억</a></li>
+        <li><a href="board.html">게시판</a></li>
+    </ul>
+    <button id="logout-btn" class="logout-btn">로그아웃</button>
+</nav>
+
+<div class="page-wrap">
+    <h1 class="page-title">여행 추억</h1>
+    <p class="page-sub">다녀온 여행을 지도 위에 기록하고 사진을 남겨요.</p>
+
+    <div id="travel-map"></div>
+
+    <div class="trip-grid" id="trip-grid"></div>
+</div>
+
+<button class="fab" id="add-trip-fab" aria-label="여행 추가">＋</button>
+
+<!-- 여행 추가 모달 -->
+<div class="modal-overlay" id="trip-modal">
+    <div class="modal-box">
+        <button class="modal-close-x" id="trip-modal-close">✕</button>
+        <h3>여행 추억 남기기</h3>
+        <form id="trip-form">
+            <div class="form-group">
+                <label>여행 제목</label>
+                <input type="text" id="trip-title" placeholder="예: 가족 다낭 여행" required>
+            </div>
+            <div class="form-group">
+                <label>장소</label>
+                <input type="text" id="trip-location" placeholder="예: 베트남 다낭" required>
+            </div>
+            <p class="map-picker-hint">📍 아래 지도를 클릭해서 위치를 표시해 주세요.</p>
+            <div id="pick-map"></div>
+            <div class="form-group">
+                <label>날짜</label>
+                <input type="date" id="trip-date" required>
+            </div>
+            <div class="form-group">
+                <label>메모 (선택)</label>
+                <textarea id="trip-memo" rows="2" placeholder="여행 이야기를 남겨보세요"></textarea>
+            </div>
+            <div class="form-group">
+                <label>사진 (준비 중이에요)</label>
+                <input type="file" id="trip-photos" accept="image/*" multiple disabled>
+                <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">사진 업로드는 조금 뒤에 켜질 예정이에요. 지금은 장소·날짜·메모만 남겨보세요.</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="trip-cancel-btn">취소</button>
+                <button type="submit" class="btn-primary" id="trip-submit-btn">등록하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 여행 상세 보기 모달 -->
+<div class="modal-overlay" id="trip-detail-modal">
+    <div class="modal-box">
+        <button class="modal-close-x" id="trip-detail-close">✕</button>
+        <span id="detail-location" style="font-size:11px;font-weight:700;color:var(--primary);"></span>
+        <h3 id="detail-title" style="margin-top:4px;"></h3>
+        <p id="detail-meta" style="font-size:11.5px;color:var(--text-muted);margin-bottom:14px;"></p>
+        <div id="detail-photos" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+        <p id="detail-memo" style="font-size:13px;line-height:1.7;margin-bottom:16px;"></p>
+        <button class="btn-secondary" id="trip-delete-btn" style="width:100%;color:#c0392b;">이 여행 삭제하기</button>
+    </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="common.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="travel.js"></script>
+</body>
+</html>

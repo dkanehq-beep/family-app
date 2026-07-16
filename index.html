@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 가족 | 로그인</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2246%22 fill=%22%23e8734a%22/><text x=%2250%22 y=%2266%22 font-size=%2250%22 text-anchor=%22middle%22>%F0%9F%8F%A0</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="login-emoji">🏠</div>
+        <h1>우리 가족</h1>
+        <p id="login-desc">가족 계정으로 로그인하고<br>일정 · 추억 · 소식을 함께 나눠요.</p>
+
+        <form id="login-form">
+            <input type="email" id="login-email" placeholder="이메일" autocomplete="email" required>
+            <input type="password" id="login-password" placeholder="비밀번호" autocomplete="current-password" required>
+            <button type="submit" class="login-btn" id="login-btn">로그인</button>
+            <p class="login-error" id="login-error"></p>
+        </form>
+
+        <form id="signup-form" style="display:none;">
+            <input type="text" id="signup-name" placeholder="이름 (예: 아빠, 엄마, 첫째)" autocomplete="name" required>
+            <input type="email" id="signup-email" placeholder="이메일" autocomplete="email" required>
+            <input type="password" id="signup-password" placeholder="비밀번호 (6자 이상)" autocomplete="new-password" minlength="6" required>
+            <input type="text" id="signup-invite" placeholder="가족 초대 코드" autocomplete="off" required>
+            <button type="submit" class="login-btn" id="signup-btn">가입하기</button>
+            <p class="login-error" id="signup-error"></p>
+        </form>
+
+        <button type="button" class="login-toggle-link" id="login-toggle">계정이 없으신가요? 가입하기</button>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+    // 이미 로그인되어 있으면 바로 홈으로
+    auth.onAuthStateChanged(function(user) {
+        if (user) window.location.href = "home.html";
+    });
+
+    let mode = "login";
+    const loginForm = document.getElementById("login-form");
+    const signupForm = document.getElementById("signup-form");
+    const toggleBtn = document.getElementById("login-toggle");
+    const descEl = document.getElementById("login-desc");
+
+    toggleBtn.addEventListener("click", function() {
+        mode = mode === "login" ? "signup" : "login";
+        loginForm.style.display = mode === "login" ? "block" : "none";
+        signupForm.style.display = mode === "signup" ? "block" : "none";
+        toggleBtn.textContent = mode === "login" ? "계정이 없으신가요? 가입하기" : "이미 계정이 있으신가요? 로그인";
+        descEl.innerHTML = mode === "login"
+            ? "가족 계정으로 로그인하고<br>일정 · 추억 · 소식을 함께 나눠요."
+            : "가족 초대 코드를 아는 분만<br>새 계정을 만들 수 있어요.";
+    });
+
+    loginForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const email = document.getElementById("login-email").value;
+        const password = document.getElementById("login-password").value;
+        const errorEl = document.getElementById("login-error");
+        const btn = document.getElementById("login-btn");
+        errorEl.classList.remove("show");
+        btn.disabled = true;
+        btn.textContent = "확인 중...";
+
+        auth.signInWithEmailAndPassword(email, password)
+            .then(function() {
+                window.location.href = "home.html";
+            })
+            .catch(function() {
+                errorEl.textContent = "이메일 또는 비밀번호가 올바르지 않아요.";
+                errorEl.classList.add("show");
+                btn.disabled = false;
+                btn.textContent = "로그인";
+            });
+    });
+
+    signupForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const name = document.getElementById("signup-name").value.trim();
+        const email = document.getElementById("signup-email").value;
+        const password = document.getElementById("signup-password").value;
+        const invite = document.getElementById("signup-invite").value.trim();
+        const errorEl = document.getElementById("signup-error");
+        const btn = document.getElementById("signup-btn");
+        errorEl.classList.remove("show");
+
+        if (invite !== FAMILY_INVITE_CODE) {
+            errorEl.textContent = "가족 초대 코드가 올바르지 않아요.";
+            errorEl.classList.add("show");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "가입 중...";
+
+        auth.createUserWithEmailAndPassword(email, password)
+            .then(function(cred) {
+                return cred.user.updateProfile({ displayName: name });
+            })
+            .then(function() {
+                window.location.href = "home.html";
+            })
+            .catch(function(err) {
+                errorEl.textContent = (err.code === "auth/email-already-in-use")
+                    ? "이미 가입된 이메일이에요. 로그인해 주세요."
+                    : "가입에 실패했어요: " + err.message;
+                errorEl.classList.add("show");
+                btn.disabled = false;
+                btn.textContent = "가입하기";
+            });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 가족 | 캘린더</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2246%22 fill=%22%23e8734a%22/><text x=%2250%22 y=%2266%22 font-size=%2250%22 text-anchor=%22middle%22>%F0%9F%8F%A0</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="topbar">
+    <a href="home.html" class="topbar-logo">🏠 우리 가족</a>
+    <ul class="topbar-nav">
+        <li><a href="home.html">홈</a></li>
+        <li><a href="calendar.html" class="active">캘린더</a></li>
+        <li><a href="travel.html">여행 추억</a></li>
+        <li><a href="board.html">게시판</a></li>
+    </ul>
+    <button id="logout-btn" class="logout-btn">로그아웃</button>
+</nav>
+
+<div class="page-wrap">
+    <h1 class="page-title">가족 캘린더</h1>
+    <p class="page-sub">생일, 모임, 여행 일정을 함께 확인해요.</p>
+
+    <div class="cal-header">
+        <button class="cal-nav-btn" id="cal-prev">‹</button>
+        <h2 id="cal-month-label"></h2>
+        <button class="cal-nav-btn" id="cal-next">›</button>
+    </div>
+
+    <div class="cal-grid">
+        <div class="cal-weekdays">
+            <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+    </div>
+
+    <div class="event-list-panel">
+        <h3>다가오는 일정</h3>
+        <div id="upcoming-list"></div>
+    </div>
+</div>
+
+<button class="fab" id="add-event-fab" aria-label="일정 추가">＋</button>
+
+<!-- 일정 추가/보기 모달 -->
+<div class="modal-overlay" id="event-modal">
+    <div class="modal-box">
+        <button class="modal-close-x" id="event-modal-close">✕</button>
+        <h3 id="event-modal-title">일정 추가</h3>
+
+        <div id="day-events-list"></div>
+
+        <form id="event-form">
+            <div class="form-group">
+                <label>날짜</label>
+                <input type="date" id="event-date" required>
+            </div>
+            <div class="form-group">
+                <label>제목</label>
+                <input type="text" id="event-title" placeholder="예: 엄마 생신" required>
+            </div>
+            <div class="form-group">
+                <label>시간 (선택)</label>
+                <input type="time" id="event-time">
+            </div>
+            <div class="form-group">
+                <label>메모 (선택)</label>
+                <textarea id="event-memo" rows="2" placeholder="장소, 준비물 등"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="event-cancel-btn">취소</button>
+                <button type="submit" class="btn-primary">등록하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="common.js"></script>
+<script src="calendar.js"></script>
+</body>
+</html>

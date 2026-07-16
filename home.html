@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 가족 | 홈</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2246%22 fill=%22%23e8734a%22/><text x=%2250%22 y=%2266%22 font-size=%2250%22 text-anchor=%22middle%22>%F0%9F%8F%A0</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="topbar">
+    <a href="home.html" class="topbar-logo">🏠 우리 가족</a>
+    <ul class="topbar-nav">
+        <li><a href="home.html" class="active">홈</a></li>
+        <li><a href="calendar.html">캘린더</a></li>
+        <li><a href="travel.html">여행 추억</a></li>
+        <li><a href="board.html">게시판</a></li>
+    </ul>
+    <button id="logout-btn" class="logout-btn">로그아웃</button>
+</nav>
+
+<div class="page-wrap">
+    <div class="home-hero">
+        <h1 id="home-greeting">오늘도 좋은 하루예요 ☀️</h1>
+        <p>우리 가족만의 일정, 추억, 이야기를 이곳에 모아요.</p>
+    </div>
+
+    <div class="dash-grid">
+        <a class="dash-card" href="calendar.html">
+            <div class="dash-card-icon">📅</div>
+            <h3>가족 캘린더</h3>
+            <p>생일, 모임, 여행 일정을 함께 확인하고 등록해요.</p>
+        </a>
+        <a class="dash-card" href="travel.html">
+            <div class="dash-card-icon">🗺️</div>
+            <h3>여행 추억</h3>
+            <p>다녀온 여행을 지도 위에 기록하고 사진을 남겨요.</p>
+        </a>
+        <a class="dash-card" href="board.html">
+            <div class="dash-card-icon">💬</div>
+            <h3>가족 게시판</h3>
+            <p>서로에게 소식을 전하고 댓글로 이야기 나눠요.</p>
+        </a>
+    </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="common.js"></script>
+</body>
+</html>

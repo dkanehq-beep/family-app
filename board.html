@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 가족 | 게시판</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2246%22 fill=%22%23e8734a%22/><text x=%2250%22 y=%2266%22 font-size=%2250%22 text-anchor=%22middle%22>%F0%9F%8F%A0</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="topbar">
+    <a href="home.html" class="topbar-logo">🏠 우리 가족</a>
+    <ul class="topbar-nav">
+        <li><a href="home.html">홈</a></li>
+        <li><a href="calendar.html">캘린더</a></li>
+        <li><a href="travel.html">여행 추억</a></li>
+        <li><a href="board.html" class="active">게시판</a></li>
+    </ul>
+    <button id="logout-btn" class="logout-btn">로그아웃</button>
+</nav>
+
+<div class="page-wrap">
+    <!-- 목록 화면 -->
+    <div id="board-list-view">
+        <h1 class="page-title">가족 게시판</h1>
+        <p class="page-sub">서로에게 소식을 전하고 댓글로 이야기 나눠요.</p>
+        <div class="board-list" id="board-list"></div>
+    </div>
+
+    <!-- 상세 화면 -->
+    <div id="board-detail-view" style="display:none;">
+        <button class="btn-secondary" id="back-to-list-btn" style="margin-bottom:18px;">← 목록으로</button>
+        <div class="post-detail">
+            <h2 id="detail-post-title"></h2>
+            <p class="meta" id="detail-post-meta"></p>
+            <p class="content" id="detail-post-content"></p>
+            <button class="btn-secondary" id="delete-post-btn" style="color:#c0392b;">게시글 삭제</button>
+
+            <div class="comment-list" id="comment-list"></div>
+            <form class="comment-form" id="comment-form">
+                <input type="text" id="comment-text" placeholder="댓글을 남겨보세요" required>
+                <button type="submit" class="btn-primary">등록</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<button class="fab" id="add-post-fab" aria-label="글쓰기">＋</button>
+
+<!-- 글쓰기 모달 -->
+<div class="modal-overlay" id="post-modal">
+    <div class="modal-box">
+        <button class="modal-close-x" id="post-modal-close">✕</button>
+        <h3>새 글 쓰기</h3>
+        <form id="post-form">
+            <div class="form-group">
+                <label>제목</label>
+                <input type="text" id="post-title" placeholder="제목을 입력하세요" required>
+            </div>
+            <div class="form-group">
+                <label>내용</label>
+                <textarea id="post-content" rows="5" placeholder="이야기를 들려주세요" required></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="post-cancel-btn">취소</button>
+                <button type="submit" class="btn-primary">등록하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="common.js"></script>
+<script src="board.js"></script>
+</body>
+</html>
