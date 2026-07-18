@@ -98,6 +98,7 @@ document.getElementById("comment-form").addEventListener("submit", function(e) {
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function() {
         document.getElementById("comment-text").value = "";
+        awardMileage(5, "댓글 작성");
     }).catch(function(err) {
         showToast("댓글 등록에 실패했어요: " + err.message);
     });
@@ -132,6 +133,7 @@ postForm.addEventListener("submit", function(e) {
     db.collection("posts").add(data).then(function() {
         showToast("글이 등록되었어요 ✏️");
         closePostModal();
+        awardMileage(15, "게시글 작성: " + data.title);
     }).catch(function(err) {
         showToast("등록에 실패했어요: " + err.message);
     });

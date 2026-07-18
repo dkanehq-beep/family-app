@@ -41,6 +41,33 @@ function isOwner(item) {
     return !!(item && auth.currentUser && item.ownerUid === auth.currentUser.uid);
 }
 
+// ✨ 마일리지 적립/차감 (현재 로그인한 계정 기준)
+// amount: 양수면 적립, 음수면 차감 / reason: 내역에 표시될 문구
+function awardMileage(amount, reason) {
+    if (!auth.currentUser) return;
+    const uid = auth.currentUser.uid;
+    const name = currentUserName();
+    const mileageRef = db.collection("mileage").doc(uid);
+
+    db.runTransaction(function(tx) {
+        return tx.get(mileageRef).then(function(doc) {
+            const current = doc.exists ? (doc.data().total || 0) : 0;
+            const next = Math.max(0, current + amount);
+            tx.set(mileageRef, { name: name, total: next }, { merge: true });
+        });
+    }).then(function() {
+        return db.collection("mileage_log").add({
+            uid: uid,
+            name: name,
+            amount: amount,
+            reason: reason,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    }).catch(function(err) {
+        console.error("마일리지 적립 실패:", err.message);
+    });
+}
+
 // ✨ 다크 모드 토글 (로컬 저장)
 const MOON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg>';
 const SUN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/></svg>';

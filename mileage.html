@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>우리 가족 | 마일리지</title>
+    <link rel="icon" href="icon-512.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-180.png">
+    <meta name="theme-color" content="#e8734a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="우리가족">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="topbar">
+    <a href="home.html" class="topbar-logo"><span>우리 가족</span></a>
+    <ul class="topbar-nav">
+        <li><a href="home.html">홈</a></li>
+        <li><a href="calendar.html">캘린더</a></li>
+        <li><a href="schedule.html">시간표</a></li>
+        <li><a href="mileage.html" class="active">마일리지</a></li>
+        <li><a href="travel.html">여행 추억</a></li>
+        <li><a href="board.html">게시판</a></li>
+    </ul>
+    <button id="theme-toggle" class="theme-toggle-btn" aria-label="다크 모드 토글"></button>
+    <button id="logout-btn" class="logout-btn">로그아웃</button>
+</nav>
+
+<div class="page-wrap">
+    <div class="page-header-band">
+        <div class="page-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+        <div class="page-header-text">
+            <h1>가족 마일리지</h1>
+            <p>숙제, 게시글, 투표 참여로 마일리지를 모아보세요. (1마일리지 = 50원)</p>
+        </div>
+    </div>
+
+    <div id="mileage-list"></div>
+
+    <div class="section-block">
+        <div class="section-header">
+            <h3 class="section-label">적립 · 지급 내역</h3>
+        </div>
+        <div id="mileage-log-list"></div>
+    </div>
+</div>
+
+<!-- 지급 확인 모달 -->
+<div class="modal-overlay" id="payout-modal">
+    <div class="modal-box">
+        <button class="modal-close-x" id="payout-modal-close">✕</button>
+        <h3>마일리지 지급</h3>
+        <p id="payout-desc" style="font-size:13px; color:var(--text-muted); line-height:1.7; margin-bottom:20px;"></p>
+        <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="payout-cancel-btn">취소</button>
+            <button type="button" class="btn-primary" id="payout-confirm-btn">실제로 지급했어요</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="common.js"></script>
+<script src="mileage.js"></script>
+</body>
+</html>

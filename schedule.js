@@ -189,7 +189,9 @@ function bindHomeworkEvents() {
             const id = item.dataset.id;
             const hw = allHomework.find(function(h) { return h.id === id; });
             if (!hw) return;
-            db.collection("homework").doc(id).update({ done: !hw.done });
+            const newDone = !hw.done;
+            db.collection("homework").doc(id).update({ done: newDone });
+            awardMileage(newDone ? 10 : -10, `숙제 완료: ${hw.title}`);
         });
     });
     document.querySelectorAll(".homework-del").forEach(function(btn) {

@@ -162,9 +162,12 @@ function renderPollWidget() {
     widget.querySelectorAll(".poll-option-btn").forEach(function(btn) {
         btn.addEventListener("click", function() {
             const idx = Number(btn.dataset.index);
+            const alreadyVoted = !!currentPollVotes.find(function(v) { return v.id === auth.currentUser.uid; });
             db.collection("polls").doc(currentPoll.id).collection("votes").doc(auth.currentUser.uid).set({
                 optionIndex: idx,
                 voterName: currentUserName()
+            }).then(function() {
+                if (!alreadyVoted) awardMileage(5, "투표 참여: " + currentPoll.question);
             }).catch(function(err) {
                 showToast("투표에 실패했어요: " + err.message);
             });
