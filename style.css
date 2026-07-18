@@ -522,9 +522,8 @@ a { color: inherit; }
 
 .dash-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 18px;
-    margin-top: 30px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
 }
 @media (min-width: 640px) {
     .dash-grid { grid-template-columns: repeat(4, 1fr); }
@@ -532,31 +531,139 @@ a { color: inherit; }
 .dash-card {
     background: var(--card-bg);
     border: 1px solid var(--border-light);
-    border-radius: 20px;
-    padding: 30px 24px;
+    border-radius: 16px;
+    padding: 18px 14px;
     box-shadow: var(--shadow-sm);
     text-decoration: none;
     color: var(--text-main);
-    transition: transform 0.35s cubic-bezier(0.25,1,0.5,1), box-shadow 0.35s, border-color 0.35s;
+    text-align: center;
+    transition: transform 0.3s cubic-bezier(0.25,1,0.5,1), box-shadow 0.3s, border-color 0.3s;
     display: block;
 }
-.dash-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--border-accent); }
-.dash-card:active { transform: scale(0.97); transition-duration: 0.1s; }
+.dash-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--border-accent); }
+.dash-card:active { transform: scale(0.96); transition-duration: 0.1s; }
 .dash-card-icon {
-    width: 50px; height: 50px;
-    border-radius: 14px;
+    width: 40px; height: 40px;
+    border-radius: 11px;
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: 18px;
-    transition: transform 0.35s cubic-bezier(0.25,1,0.5,1);
+    margin: 0 auto 10px auto;
+    transition: transform 0.3s cubic-bezier(0.25,1,0.5,1);
 }
-.dash-card-icon svg { width: 24px; height: 24px; }
+.dash-card-icon svg { width: 19px; height: 19px; }
 .dash-card:hover .dash-card-icon { transform: scale(1.08) rotate(-4deg); }
 .dash-card:nth-child(1) .dash-card-icon { background: var(--primary-light); color: var(--primary); }
 .dash-card:nth-child(2) .dash-card-icon { background: rgba(79, 125, 140, 0.1); color: var(--blue); }
 .dash-card:nth-child(3) .dash-card-icon { background: rgba(184, 147, 90, 0.15); color: var(--accent); }
 .dash-card:nth-child(4) .dash-card-icon { background: rgba(138, 90, 107, 0.12); color: var(--plum); }
-.dash-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 7px; }
-.dash-card p { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; font-weight: 300; }
+.dash-card h3 { font-size: 12.5px; font-weight: 700; }
+
+/* ✨ 홈 섹션 공통 */
+.section-block { margin-top: 26px; }
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.section-label {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+.section-add-btn {
+    background: var(--primary-light);
+    border: none;
+    color: var(--primary);
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 7px 14px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.section-add-btn:hover { background: rgba(201, 102, 58, 0.18); }
+.section-add-btn:active { transform: scale(0.95); }
+.show-more-btn {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+}
+.show-more-btn:hover { text-decoration: underline; }
+
+/* ✨ 오늘의 요약 */
+.today-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 14px 18px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.today-kid-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--primary-light);
+    padding: 5px 12px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+.today-info { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-muted); }
+.today-info b { color: var(--text-main); font-weight: 700; }
+
+/* ✨ 가족 투표 */
+.poll-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+}
+.poll-question { font-size: 14.5px; font-weight: 700; color: var(--text-main); margin-bottom: 14px; }
+.poll-options { display: flex; flex-direction: column; gap: 8px; }
+.poll-option-btn {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    background: var(--bg-main);
+    color: var(--text-main);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+    text-align: left;
+    transition: border-color 0.2s;
+}
+.poll-option-btn:active { transform: scale(0.98); }
+.poll-option-btn.voted { border-color: var(--primary); }
+.poll-option-bar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--primary-light);
+    z-index: 0;
+    transition: width 0.4s cubic-bezier(0.25,1,0.5,1);
+}
+.poll-option-label, .poll-option-count { position: relative; z-index: 1; }
+.poll-option-count { color: var(--primary); font-weight: 700; flex-shrink: 0; margin-left: 10px; }
+.poll-meta { font-size: 10.5px; color: var(--text-muted); margin-top: 12px; }
 
 /* ===== 버튼 공통 ===== */
 .btn-primary {
