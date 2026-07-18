@@ -968,11 +968,16 @@ a { color: inherit; }
 .hybrid-pick-btn:active { transform: translateY(-50%) scale(0.9); }
 .native-picker-hidden {
     position: absolute;
-    width: 1px;
-    height: 1px;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
     opacity: 0;
-    pointer-events: none;
     border: none;
+    padding: 0;
+    cursor: pointer;
+    z-index: 2;
 }
 .modal-actions {
     display: flex;

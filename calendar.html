@@ -74,17 +74,17 @@
                 <label>날짜</label>
                 <div class="hybrid-input">
                     <input type="text" id="event-date" inputmode="numeric" placeholder="예: 2026-03-15" required>
-                    <button type="button" class="hybrid-pick-btn" data-for="event-date-native" aria-label="달력에서 선택"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M3.5 9.5h17"/><path d="M8 3v3.2M16 3v3.2"/></svg></button>
+                    <button type="button" class="hybrid-pick-btn" data-for="event-date-native" aria-label="달력에서 선택" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M3.5 9.5h17"/><path d="M8 3v3.2M16 3v3.2"/></svg></button>
+                    <input type="date" id="event-date-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
                 </div>
-                <input type="date" id="event-date-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
             </div>
             <div class="form-group">
                 <label>종료일 (선택, 여러 날 일정일 때만)</label>
                 <div class="hybrid-input">
                     <input type="text" id="event-end-date" inputmode="numeric" placeholder="예: 2026-03-18 (비워두면 하루짜리 일정)">
-                    <button type="button" class="hybrid-pick-btn" data-for="event-end-date-native" aria-label="달력에서 선택"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M3.5 9.5h17"/><path d="M8 3v3.2M16 3v3.2"/></svg></button>
+                    <button type="button" class="hybrid-pick-btn" data-for="event-end-date-native" aria-label="달력에서 선택" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M3.5 9.5h17"/><path d="M8 3v3.2M16 3v3.2"/></svg></button>
+                    <input type="date" id="event-end-date-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
                 </div>
-                <input type="date" id="event-end-date-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
             </div>
             <div class="form-group">
                 <label>제목</label>
@@ -94,9 +94,9 @@
                 <label>시간 (선택)</label>
                 <div class="hybrid-input">
                     <input type="text" id="event-time" list="time-suggestions" inputmode="numeric" placeholder="예: 18:30">
-                    <button type="button" class="hybrid-pick-btn" data-for="event-time-native" aria-label="시간 선택"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></button>
+                    <button type="button" class="hybrid-pick-btn" data-for="event-time-native" aria-label="시간 선택" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></button>
+                    <input type="time" id="event-time-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
                 </div>
-                <input type="time" id="event-time-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
                 <datalist id="time-suggestions">
                     <option value="09:00"><option value="10:00"><option value="12:00">
                     <option value="14:00"><option value="18:00"><option value="19:00"><option value="20:00">
