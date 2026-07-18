@@ -311,7 +311,11 @@ a { color: inherit; }
     display: flex;
     gap: 2px;
     list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
+.topbar-nav::-webkit-scrollbar { display: none; }
+.topbar-nav li { flex-shrink: 0; }
 .topbar-nav a {
     display: block;
     padding: 8px 13px;
@@ -320,6 +324,7 @@ a { color: inherit; }
     font-weight: 500;
     color: var(--text-muted);
     text-decoration: none;
+    white-space: nowrap;
     transition: all 0.2s;
 }
 .topbar-nav a:hover, .topbar-nav a.active {
