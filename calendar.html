@@ -79,6 +79,14 @@
                 <input type="date" id="event-date-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
             </div>
             <div class="form-group">
+                <label>종료일 (선택, 여러 날 일정일 때만)</label>
+                <div class="hybrid-input">
+                    <input type="text" id="event-end-date" inputmode="numeric" placeholder="예: 2026-03-18 (비워두면 하루짜리 일정)">
+                    <button type="button" class="hybrid-pick-btn" data-for="event-end-date-native" aria-label="달력에서 선택"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M3.5 9.5h17"/><path d="M8 3v3.2M16 3v3.2"/></svg></button>
+                </div>
+                <input type="date" id="event-end-date-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
+            </div>
+            <div class="form-group">
                 <label>제목</label>
                 <input type="text" id="event-title" placeholder="예: 엄마 생신" required>
             </div>

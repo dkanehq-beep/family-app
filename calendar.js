@@ -10,7 +10,22 @@ function pad2(n) { return String(n).padStart(2, "0"); }
 function dateKey(y, m, d) { return `${y}-${pad2(m + 1)}-${pad2(d)}`; }
 
 bindHybridPicker("event-date", "event-date-native", '[data-for="event-date-native"]');
+bindHybridPicker("event-end-date", "event-end-date-native", '[data-for="event-end-date-native"]');
 bindHybridPicker("event-time", "event-time-native", '[data-for="event-time-native"]');
+
+// ✨ 여러 날짜 일정 지원: 이 날짜가 일정 기간(date~endDate) 안에 포함되는지
+function eventCoversDate(ev, key) {
+    const end = ev.endDate || ev.date;
+    return key >= ev.date && key <= end;
+}
+
+// ✨ 여러 날짜 일정이면 "7월 1일 ~ 7월 10일" 형태로 표시
+function formatEventDateLabel(ev) {
+    if (ev.endDate && ev.endDate !== ev.date) {
+        return `${formatDateShort(ev.date)} ~ ${formatDateShort(ev.endDate)}`;
+    }
+    return formatDateShort(ev.date);
+}
 
 function renderCalendar() {
     document.getElementById("cal-month-label").textContent = `${calYear}년 ${calMonth + 1}월`;
@@ -38,7 +53,7 @@ function renderCalendar() {
         num.textContent = d;
         cell.appendChild(num);
 
-        const dayEvents = allEvents.filter(function(ev) { return ev.date === key; });
+        const dayEvents = allEvents.filter(function(ev) { return eventCoversDate(ev, key); });
         dayEvents.slice(0, 3).forEach(function(ev) {
             const dot = document.createElement("span");
             dot.className = "cal-event-dot";
@@ -54,7 +69,7 @@ function renderCalendar() {
 function renderUpcoming() {
     const todayKey = dateKey(today.getFullYear(), today.getMonth(), today.getDate());
     const upcoming = allEvents
-        .filter(function(ev) { return ev.date >= todayKey; })
+        .filter(function(ev) { return (ev.endDate || ev.date) >= todayKey; })
         .sort(function(a, b) { return a.date.localeCompare(b.date); })
         .slice(0, 8);
 
@@ -68,7 +83,7 @@ function renderUpcoming() {
         const item = document.createElement("div");
         item.className = "event-item";
         item.innerHTML = `
-            <div class="event-item-date">${formatDateShort(ev.date)}</div>
+            <div class="event-item-date">${formatEventDateLabel(ev)}</div>
             <div class="event-item-body">
                 <h4>${escapeHtml(ev.title)}${ev.time ? " · " + ev.time : ""}</h4>
                 <p>${escapeHtml(ev.author)}${ev.memo ? " · " + escapeHtml(ev.memo) : ""}</p>
@@ -98,15 +113,17 @@ function openEventModal(dateStr) {
     document.getElementById("event-date-native").value = dateStr;
     document.getElementById("event-modal-title").textContent = formatDateShort(dateStr) + " 일정";
 
-    const dayEvents = allEvents.filter(function(ev) { return ev.date === dateStr; });
+    const dayEvents = allEvents.filter(function(ev) { return eventCoversDate(ev, dateStr); });
     const listEl = document.getElementById("day-events-list");
     if (dayEvents.length > 0) {
         listEl.innerHTML = dayEvents.map(function(ev) {
+            const rangeNote = (ev.endDate && ev.endDate !== ev.date) ? `<span class="event-range-tag">${formatEventDateLabel(ev)}</span>` : "";
             return `
                 <div class="event-item">
                     <div class="event-item-body">
                         <h4>${escapeHtml(ev.title)}${ev.time ? " · " + ev.time : ""}</h4>
                         <p>${escapeHtml(ev.author)}${ev.memo ? " · " + escapeHtml(ev.memo) : ""}</p>
+                        ${rangeNote}
                     </div>
                     ${isOwner(ev) ? `<button class="event-item-del" data-id="${ev.id}">삭제</button>` : ""}
                 </div>
@@ -139,8 +156,17 @@ eventModal.addEventListener("click", function(e) {
 
 eventForm.addEventListener("submit", function(e) {
     e.preventDefault();
+    const startDate = document.getElementById("event-date").value;
+    const endDate = document.getElementById("event-end-date").value.trim();
+
+    if (endDate && endDate < startDate) {
+        showToast("종료일이 시작일보다 빠를 수 없어요.");
+        return;
+    }
+
     const data = {
-        date: document.getElementById("event-date").value,
+        date: startDate,
+        endDate: endDate || null,
         title: document.getElementById("event-title").value.trim(),
         time: document.getElementById("event-time").value,
         memo: document.getElementById("event-memo").value.trim(),
