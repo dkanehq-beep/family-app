@@ -35,6 +35,14 @@
         <p>작은 순간들이 모여 우리 가족의 이야기가 됩니다.</p>
     </div>
 
+    <div class="announce-section">
+        <div class="announce-header">
+            <h3>공지사항</h3>
+            <button class="announce-add-btn" id="announce-add-btn">+ 공지 작성</button>
+        </div>
+        <div id="announce-list"></div>
+    </div>
+
     <div class="dash-grid">
         <a class="dash-card" href="calendar.html">
             <div class="dash-card-icon">
@@ -67,6 +75,28 @@
     </div>
 </div>
 
+<!-- 공지 작성 모달 -->
+<div class="modal-overlay" id="announce-modal">
+    <div class="modal-box">
+        <button class="modal-close-x" id="announce-modal-close">✕</button>
+        <h3>공지 작성</h3>
+        <form id="announce-form">
+            <div class="form-group">
+                <label>제목</label>
+                <input type="text" id="announce-title" placeholder="예: 이번 주말 가족 모임 안내" required>
+            </div>
+            <div class="form-group">
+                <label>내용</label>
+                <textarea id="announce-content" rows="4" placeholder="자세한 내용을 적어주세요" required></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="announce-cancel-btn">취소</button>
+                <button type="submit" class="btn-primary">등록하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div id="toast-container" class="toast-container"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -75,5 +105,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="common.js"></script>
+<script src="home.js"></script>
 </body>
 </html>
