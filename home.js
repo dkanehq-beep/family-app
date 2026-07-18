@@ -57,6 +57,8 @@ announceModal.addEventListener("click", function(e) {
 
 announceForm.addEventListener("submit", function(e) {
     e.preventDefault();
+    const submitBtn = announceForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
     db.collection("announcements").add({
         title: document.getElementById("announce-title").value.trim(),
         content: document.getElementById("announce-content").value.trim(),
@@ -67,6 +69,10 @@ announceForm.addEventListener("submit", function(e) {
         showToast("공지를 등록했어요 📢");
         announceModal.classList.remove("open");
         announceForm.reset();
+    }).catch(function(err) {
+        showToast("등록에 실패했어요: " + err.message);
+    }).finally(function() {
+        submitBtn.disabled = false;
     });
 });
 

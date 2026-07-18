@@ -627,6 +627,8 @@ a { color: inherit; }
 }
 .cal-day {
     min-height: 64px;
+    min-width: 0;
+    overflow: hidden;
     padding: 6px 4px;
     border-right: 1px solid var(--border-light);
     border-bottom: 1px solid var(--border-light);

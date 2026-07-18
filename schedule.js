@@ -67,6 +67,9 @@ kidForm.addEventListener("submit", function(e) {
             showToast(`${name} 추가했어요`);
             kidModal.classList.remove("open");
             kidForm.reset();
+        })
+        .catch(function(err) {
+            showToast("추가에 실패했어요: " + err.message);
         });
 });
 
@@ -159,7 +162,8 @@ function bindDayFieldEvents() {
             const data = { kidId: currentKidId, day: day };
             data[field] = input.value.trim();
             db.collection("weekly_schedule").doc(docId).set(data, { merge: true })
-                .then(function() { showToast("저장했어요"); });
+                .then(function() { showToast("저장했어요"); })
+                .catch(function(err) { showToast("저장에 실패했어요: " + err.message); });
         });
     });
 }
@@ -213,6 +217,8 @@ homeworkForm.addEventListener("submit", function(e) {
         showToast("숙제를 추가했어요");
         homeworkModal.classList.remove("open");
         homeworkForm.reset();
+    }).catch(function(err) {
+        showToast("추가에 실패했어요: " + err.message);
     });
 });
 
