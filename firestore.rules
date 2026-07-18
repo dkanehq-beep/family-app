@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(data) {
+      return isSignedIn() && data.ownerUid == request.auth.uid;
+    }
+
+    // 게시판 글 + 댓글
+    match /posts/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn();
+      allow delete: if isOwner(resource.data);
+
+      match /comments/{commentId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update, delete: if isOwner(resource.data);
+      }
+    }
+
+    // 캘린더 일정
+    match /events/{eventId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn();
+      allow delete: if isOwner(resource.data);
+    }
+
+    // 여행 기록
+    match /trips/{tripId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn();
+      allow delete: if isOwner(resource.data);
+    }
+
+    // 공지사항
+    match /announcements/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn();
+      allow delete: if isOwner(resource.data);
+    }
+
+    // 숙제 (완료 체크는 가족 누구나, 삭제는 작성자만)
+    match /homework/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn();
+      allow delete: if isOwner(resource.data);
+    }
+
+    // 아이 목록 / 주간 시간표 (가족 공유 데이터)
+    match /kids/{id} {
+      allow read, write: if isSignedIn();
+    }
+    match /weekly_schedule/{id} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 마일리지
+    match /mileage/{uid} {
+      allow read, write: if isSignedIn();
+    }
+    match /mileage_log/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // 가족 투표
+    match /polls/{pollId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isOwner(resource.data);
+
+      match /votes/{voterUid} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn() && request.auth.uid == voterUid;
+      }
+    }
+
+    // 그 외 컬렉션은 기본 차단
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
