@@ -8,7 +8,22 @@ auth.onAuthStateChanged(function(user) {
     if (greetEl) {
         greetEl.textContent = buildGreeting(user.displayName || "가족");
     }
+    const heroGreetEl = document.getElementById("home-hero-greeting");
+    if (heroGreetEl) {
+        heroGreetEl.textContent = buildGreeting(user.displayName || "가족");
+    }
+    const heroDateEl = document.getElementById("home-hero-date");
+    if (heroDateEl) {
+        heroDateEl.textContent = formatTodayLong();
+    }
 });
+
+// ✨ 오늘 날짜를 "2026년 7월 18일 토요일" 형식으로
+function formatTodayLong() {
+    const d = new Date();
+    const weekday = ["일", "월", "화", "수", "목", "금", "토"][d.getDay()];
+    return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${weekday}요일`;
+}
 
 // ✨ 시간대별로 달라지는 인사말 (매번 조금씩 다르게)
 function buildGreeting(name) {

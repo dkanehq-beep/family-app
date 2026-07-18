@@ -509,8 +509,8 @@ a { color: inherit; }
 /* ===== 홈 대시보드 ===== */
 .home-hero {
     text-align: center;
-    padding: 46px 28px;
-    margin-top: 24px;
+    padding: 40px 28px 38px 28px;
+    margin-bottom: 28px;
     border-radius: 24px;
     background: linear-gradient(155deg, #3a231a 0%, #6b3a24 55%, var(--primary) 100%);
     box-shadow: 0 20px 46px rgba(44, 24, 16, 0.25);
@@ -522,11 +522,19 @@ a { color: inherit; }
     position: absolute; inset: 0;
     background: radial-gradient(circle at 85% 0%, rgba(255,255,255,0.14) 0%, transparent 50%);
 }
+.home-hero-date {
+    position: relative;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin-bottom: 12px;
+}
 .home-hero h1 {
     position: relative;
-    font-size: 25px;
+    font-size: 23px;
     font-weight: 700;
-    margin-bottom: 10px;
     color: #fdf8f2;
 }
 .home-hero p {
@@ -534,6 +542,7 @@ a { color: inherit; }
     font-size: 13.5px;
     color: rgba(253, 248, 242, 0.75);
     font-weight: 300;
+    margin-top: 10px;
 }
 
 /* ✨ 공지사항 */
@@ -571,7 +580,9 @@ a { color: inherit; }
     padding: 16px 18px;
     box-shadow: var(--shadow-sm);
     margin-bottom: 10px;
+    transition: transform 0.3s cubic-bezier(0.25,1,0.5,1), box-shadow 0.3s;
 }
+.announce-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .announce-card-top {
     display: flex;
     justify-content: space-between;
@@ -649,6 +660,17 @@ a { color: inherit; }
     font-size: 15px;
     font-weight: 700;
     color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.section-label::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--primary);
+    flex-shrink: 0;
 }
 .section-add-btn {
     background: var(--primary-light);
@@ -689,14 +711,16 @@ a { color: inherit; }
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
+    transition: transform 0.3s cubic-bezier(0.25,1,0.5,1), box-shadow 0.3s;
 }
+.today-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .today-kid-name {
     font-family: 'Noto Serif KR', serif;
     font-size: 13px;
     font-weight: 700;
-    color: var(--primary);
-    background: var(--primary-light);
-    padding: 5px 12px;
+    color: #fdf8f2;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    padding: 5px 13px;
     border-radius: 8px;
     flex-shrink: 0;
 }
@@ -736,7 +760,7 @@ a { color: inherit; }
 .poll-option-bar {
     position: absolute;
     left: 0; top: 0; bottom: 0;
-    background: var(--primary-light);
+    background: linear-gradient(90deg, rgba(201, 102, 58, 0.14), rgba(184, 147, 90, 0.16));
     z-index: 0;
     transition: width 0.4s cubic-bezier(0.25,1,0.5,1);
 }
