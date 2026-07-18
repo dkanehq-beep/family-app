@@ -135,7 +135,7 @@ function renderWeekDays() {
                                 <div class="homework-item${h.done ? " done" : ""}" data-id="${h.id}">
                                     <span class="homework-check"></span>
                                     <span class="homework-text">${escapeHtml(h.title)}</span>
-                                    <button type="button" class="homework-del" data-id="${h.id}">✕</button>
+                                    ${isOwner(h) ? `<button type="button" class="homework-del" data-id="${h.id}">✕</button>` : ""}
                                 </div>
                             `;
                         }).join("")}
@@ -207,6 +207,7 @@ homeworkForm.addEventListener("submit", function(e) {
         date: homeworkTargetDate,
         title: title,
         done: false,
+        ownerUid: auth.currentUser.uid,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function() {
         showToast("숙제를 추가했어요");

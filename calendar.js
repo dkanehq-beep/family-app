@@ -73,7 +73,7 @@ function renderUpcoming() {
                 <h4>${escapeHtml(ev.title)}${ev.time ? " · " + ev.time : ""}</h4>
                 <p>${escapeHtml(ev.author)}${ev.memo ? " · " + escapeHtml(ev.memo) : ""}</p>
             </div>
-            <button class="event-item-del" data-id="${ev.id}">삭제</button>
+            ${isOwner(ev) ? `<button class="event-item-del" data-id="${ev.id}">삭제</button>` : ""}
         `;
         listEl.appendChild(item);
     });
@@ -108,7 +108,7 @@ function openEventModal(dateStr) {
                         <h4>${escapeHtml(ev.title)}${ev.time ? " · " + ev.time : ""}</h4>
                         <p>${escapeHtml(ev.author)}${ev.memo ? " · " + escapeHtml(ev.memo) : ""}</p>
                     </div>
-                    <button class="event-item-del" data-id="${ev.id}">삭제</button>
+                    ${isOwner(ev) ? `<button class="event-item-del" data-id="${ev.id}">삭제</button>` : ""}
                 </div>
             `;
         }).join("");
@@ -145,6 +145,7 @@ eventForm.addEventListener("submit", function(e) {
         time: document.getElementById("event-time").value,
         memo: document.getElementById("event-memo").value.trim(),
         author: currentUserName(),
+        ownerUid: auth.currentUser.uid,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     db.collection("events").add(data)

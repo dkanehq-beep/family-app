@@ -86,6 +86,8 @@ function openTripDetail(id) {
         photosEl.innerHTML = "";
     }
 
+    document.getElementById("trip-delete-btn").style.display = isOwner(trip) ? "block" : "none";
+
     tripDetailModal.classList.add("open");
 }
 
@@ -183,6 +185,7 @@ tripForm.addEventListener("submit", function(e) {
                 date: date,
                 memo: memo,
                 author: author,
+                ownerUid: auth.currentUser.uid,
                 photoUrls: photoUrls,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });

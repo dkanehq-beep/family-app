@@ -18,6 +18,26 @@
     --shadow-lg: 0 26px 60px rgba(44, 36, 32, 0.16);
 }
 
+/* 🌙 다크 모드 */
+body.dark-mode {
+    color-scheme: dark;
+    --primary-light: rgba(201, 102, 58, 0.14);
+    --bg-main: #1c1512;
+    --card-bg: #251d19;
+    --text-main: #f2e9e2;
+    --text-muted: #a8988c;
+    --border-light: rgba(242, 233, 226, 0.08);
+    --border-accent: rgba(201, 102, 58, 0.35);
+    --shadow-sm: 0 2px 14px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 14px 30px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 26px 60px rgba(0, 0, 0, 0.55);
+}
+body.dark-mode .login-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
+body.dark-mode .btn-primary { background-color: var(--primary); }
+body.dark-mode .btn-primary:hover { background-color: var(--primary-dark); }
+body.dark-mode .fab { background: var(--primary); }
+body.dark-mode .fab:hover { background: var(--primary-dark); }
+
 * {
     margin: 0;
     padding: 0;
@@ -126,7 +146,7 @@ a { color: inherit; }
     font-size: 25px;
     font-weight: 700;
     margin-bottom: 11px;
-    color: var(--deep);
+    color: var(--text-main);
 }
 .login-card p {
     font-size: 13px;
@@ -276,7 +296,7 @@ a { color: inherit; }
     gap: 8px;
     font-size: 16px;
     font-weight: 700;
-    color: var(--deep);
+    color: var(--text-main);
     text-decoration: none;
 }
 .topbar-logo span { font-size: 16.5px; }
@@ -319,6 +339,24 @@ a { color: inherit; }
     transition: all 0.2s;
 }
 .logout-btn:hover { border-color: var(--primary); color: var(--primary); }
+.theme-toggle-btn {
+    background: none;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    margin-right: 8px;
+}
+.theme-toggle-btn svg { width: 16px; height: 16px; }
+.theme-toggle-btn:hover { border-color: var(--primary); color: var(--primary); }
+.theme-toggle-btn:active { transform: scale(0.9); }
 .logout-btn:active { transform: scale(0.95); }
 
 @media (max-width: 640px) {
@@ -336,7 +374,7 @@ a { color: inherit; }
     font-size: 23px;
     font-weight: 700;
     margin-bottom: 5px;
-    color: var(--deep);
+    color: var(--text-main);
 }
 .page-sub {
     font-size: 13px;
@@ -491,7 +529,7 @@ a { color: inherit; }
     justify-content: space-between;
     margin-bottom: 18px;
 }
-.cal-header h2 { font-size: 18px; font-weight: 700; color: var(--deep); }
+.cal-header h2 { font-size: 18px; font-weight: 700; color: var(--text-main); }
 .cal-nav-btn {
     background: var(--card-bg);
     border: 1px solid var(--border-light);
@@ -560,7 +598,7 @@ a { color: inherit; }
 }
 
 .event-list-panel { margin-top: 26px; }
-.event-list-panel h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--deep); }
+.event-list-panel h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-main); }
 .event-item {
     background: var(--card-bg);
     border: 1px solid var(--border-light);
@@ -652,7 +690,7 @@ a { color: inherit; }
     padding-bottom: 12px;
     border-bottom: 1px solid var(--border-light);
 }
-.day-card-name { font-family: 'Noto Serif KR', serif; font-size: 15px; font-weight: 700; color: var(--deep); }
+.day-card-name { font-family: 'Noto Serif KR', serif; font-size: 15px; font-weight: 700; color: var(--text-main); }
 .day-card-date { font-size: 11px; color: var(--text-muted); }
 .day-field {
     display: flex;
@@ -821,7 +859,7 @@ a { color: inherit; }
     padding: 26px 22px;
     box-shadow: var(--shadow-sm);
 }
-.post-detail h2 { font-size: 19px; font-weight: 700; margin-bottom: 6px; color: var(--deep); }
+.post-detail h2 { font-size: 19px; font-weight: 700; margin-bottom: 6px; color: var(--text-main); }
 .post-detail .meta { font-size: 11.5px; color: var(--text-muted); margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
 .post-detail .content { font-size: 13.5px; line-height: 1.85; white-space: pre-wrap; margin-bottom: 20px; font-weight: 300; }
 
@@ -865,7 +903,7 @@ a { color: inherit; }
     box-shadow: var(--shadow-lg);
     animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-.modal-box h3 { font-size: 17px; font-weight: 700; margin-bottom: 18px; color: var(--deep); }
+.modal-box h3 { font-size: 17px; font-weight: 700; margin-bottom: 18px; color: var(--text-main); }
 .form-group { margin-bottom: 14px; }
 .form-group label {
     display: block;

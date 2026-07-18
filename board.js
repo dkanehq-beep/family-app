@@ -44,6 +44,7 @@ function openPostDetail(id) {
     document.getElementById("detail-post-title").textContent = post.title;
     document.getElementById("detail-post-meta").textContent = `${post.author} · ${formatDateTime(post.createdAt)}`;
     document.getElementById("detail-post-content").textContent = post.content;
+    document.getElementById("delete-post-btn").style.display = isOwner(post) ? "block" : "none";
 
     document.getElementById("board-list-view").style.display = "none";
     document.getElementById("board-detail-view").style.display = "block";
@@ -92,6 +93,7 @@ document.getElementById("comment-form").addEventListener("submit", function(e) {
     const text = document.getElementById("comment-text").value.trim();
     db.collection("posts").doc(currentPostId).collection("comments").add({
         author: currentUserName(),
+        ownerUid: auth.currentUser.uid,
         text: text,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function() {
@@ -122,6 +124,7 @@ postForm.addEventListener("submit", function(e) {
         title: document.getElementById("post-title").value.trim(),
         content: document.getElementById("post-content").value.trim(),
         author: currentUserName(),
+        ownerUid: auth.currentUser.uid,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     db.collection("posts").add(data).then(function() {
