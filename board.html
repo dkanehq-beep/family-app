@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>우리 가족 | 게시판</title>
     <link rel="icon" href="icon-512.png">
     <link rel="manifest" href="manifest.json">
@@ -21,6 +21,7 @@
     <ul class="topbar-nav">
         <li><a href="home.html">홈</a></li>
         <li><a href="calendar.html">캘린더</a></li>
+        <li><a href="schedule.html">시간표</a></li>
         <li><a href="travel.html">여행 추억</a></li>
         <li><a href="board.html" class="active">게시판</a></li>
     </ul>
@@ -30,8 +31,15 @@
 <div class="page-wrap">
     <!-- 목록 화면 -->
     <div id="board-list-view">
-        <h1 class="page-title">가족 게시판</h1>
-        <p class="page-sub">서로에게 소식을 전하고 댓글로 이야기 나눠요.</p>
+        <div class="page-header-band">
+            <div class="page-header-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v11.5a1 1 0 0 1-1 1H9l-4.5 4V6.5a1 1 0 0 1 1-1Z"/><path d="M8 10h8M8 13.3h5"/></svg>
+            </div>
+            <div class="page-header-text">
+                <h1>가족 게시판</h1>
+                <p>서로에게 소식을 전하고 댓글로 이야기 나눠요.</p>
+            </div>
+        </div>
         <div class="board-list" id="board-list"></div>
     </div>
 

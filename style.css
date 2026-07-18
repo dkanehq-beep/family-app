@@ -5,6 +5,7 @@
     --primary-light: rgba(201, 102, 58, 0.08);
     --accent: #b8935a;
     --blue: #4f7d8c;
+    --plum: #8a5a6b;
     --deep: #2c2420;
     --bg-main: #faf6f1;
     --card-bg: #fffdfb;
@@ -344,6 +345,50 @@ a { color: inherit; }
     font-weight: 300;
 }
 
+/* ✨ 페이지 상단 그라데이션 헤더 (캘린더/여행추억/게시판) */
+.page-header-band {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px 26px;
+    margin-bottom: 28px;
+    border-radius: 20px;
+    background: linear-gradient(155deg, #3a231a 0%, #6b3a24 55%, var(--primary) 100%);
+    box-shadow: 0 16px 36px rgba(44, 24, 16, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.page-header-band::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 88% 0%, rgba(255,255,255,0.14) 0%, transparent 50%);
+}
+.page-header-icon {
+    position: relative;
+    width: 46px; height: 46px;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fdf8f2;
+    flex-shrink: 0;
+}
+.page-header-icon svg { width: 22px; height: 22px; }
+.page-header-text { position: relative; }
+.page-header-text h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: #fdf8f2;
+    margin-bottom: 3px;
+}
+.page-header-text p {
+    font-size: 12px;
+    color: rgba(253, 248, 242, 0.75);
+    font-weight: 300;
+}
+
 /* ===== 홈 대시보드 ===== */
 .home-hero {
     text-align: center;
@@ -380,7 +425,7 @@ a { color: inherit; }
     margin-top: 30px;
 }
 @media (min-width: 640px) {
-    .dash-grid { grid-template-columns: repeat(3, 1fr); }
+    .dash-grid { grid-template-columns: repeat(4, 1fr); }
 }
 .dash-card {
     background: var(--card-bg);
@@ -399,12 +444,15 @@ a { color: inherit; }
     width: 50px; height: 50px;
     border-radius: 14px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
     margin-bottom: 18px;
+    transition: transform 0.35s cubic-bezier(0.25,1,0.5,1);
 }
-.dash-card:nth-child(1) .dash-card-icon { background: var(--primary-light); }
-.dash-card:nth-child(2) .dash-card-icon { background: rgba(79, 125, 140, 0.1); }
-.dash-card:nth-child(3) .dash-card-icon { background: rgba(184, 147, 90, 0.15); }
+.dash-card-icon svg { width: 24px; height: 24px; }
+.dash-card:hover .dash-card-icon { transform: scale(1.08) rotate(-4deg); }
+.dash-card:nth-child(1) .dash-card-icon { background: var(--primary-light); color: var(--primary); }
+.dash-card:nth-child(2) .dash-card-icon { background: rgba(79, 125, 140, 0.1); color: var(--blue); }
+.dash-card:nth-child(3) .dash-card-icon { background: rgba(184, 147, 90, 0.15); color: var(--accent); }
+.dash-card:nth-child(4) .dash-card-icon { background: rgba(138, 90, 107, 0.12); color: var(--plum); }
 .dash-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 7px; }
 .dash-card p { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; font-weight: 300; }
 
@@ -555,6 +603,155 @@ a { color: inherit; }
     padding: 30px 0;
     font-weight: 300;
 }
+
+/* ===== 아이 시간표 ===== */
+.kid-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+}
+.kid-tab {
+    padding: 9px 18px;
+    border-radius: 99px;
+    border: 1px solid var(--border-light);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.kid-tab:hover { border-color: var(--primary); color: var(--primary); }
+.kid-tab:active { transform: scale(0.95); }
+.kid-tab.active {
+    background: linear-gradient(135deg, #e2935f, var(--primary));
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(201, 102, 58, 0.3);
+}
+.kid-tab-add {
+    background: none;
+    border-style: dashed;
+}
+
+.day-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 14px;
+}
+.day-card.is-today { border-color: var(--border-accent); box-shadow: 0 0 0 3px rgba(201, 102, 58, 0.08); }
+.day-card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+}
+.day-card-name { font-family: 'Noto Serif KR', serif; font-size: 15px; font-weight: 700; color: var(--deep); }
+.day-card-date { font-size: 11px; color: var(--text-muted); }
+.day-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+.day-field label {
+    flex-shrink: 0;
+    width: 40px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--primary);
+}
+.day-field-input {
+    flex: 1;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--border-light);
+    border-radius: 9px;
+    font-size: 12.5px;
+    background: var(--bg-main);
+    color: var(--text-main);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.day-field-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(201, 102, 58, 0.1); }
+
+.homework-section { margin-top: 14px; }
+.homework-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.homework-header span { font-size: 11.5px; font-weight: 700; color: var(--primary); }
+.homework-add-btn {
+    background: var(--primary-light);
+    border: none;
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.homework-add-btn:hover { background: rgba(201, 102, 58, 0.18); }
+.homework-add-btn:active { transform: scale(0.94); }
+.homework-items { display: flex; flex-direction: column; gap: 6px; }
+.homework-empty { font-size: 11.5px; color: var(--text-muted); font-weight: 300; padding: 4px 2px; }
+.homework-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-main);
+    border-radius: 9px;
+    padding: 9px 10px;
+}
+.homework-check {
+    width: 17px; height: 17px;
+    border-radius: 5px;
+    border: 1.5px solid rgba(44, 36, 32, 0.25);
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+    background: #fff;
+    transition: all 0.2s;
+}
+.homework-item.done .homework-check {
+    background: linear-gradient(135deg, #e2935f, var(--primary-dark));
+    border-color: var(--primary-dark);
+}
+.homework-item.done .homework-check::after {
+    content: '';
+    position: absolute;
+    left: 4.5px; top: 1.5px;
+    width: 4px; height: 8px;
+    border: solid #fff;
+    border-width: 0 1.6px 1.6px 0;
+    transform: rotate(45deg);
+}
+.homework-text {
+    flex: 1;
+    font-size: 12.5px;
+    color: var(--text-main);
+    cursor: pointer;
+}
+.homework-item.done .homework-text { color: var(--text-muted); text-decoration: line-through; }
+.homework-del {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.homework-del:hover { color: #b3492f; }
+.homework-del:active { opacity: 0.5; }
 
 /* ===== 여행 추억 + 지도 ===== */
 #travel-map {
@@ -718,6 +915,7 @@ a { color: inherit; }
     justify-content: center;
     transition: background 0.2s;
 }
+.hybrid-pick-btn svg { width: 17px; height: 17px; }
 .hybrid-pick-btn:hover { background: rgba(201, 102, 58, 0.16); }
 .hybrid-pick-btn:active { transform: translateY(-50%) scale(0.9); }
 .native-picker-hidden {

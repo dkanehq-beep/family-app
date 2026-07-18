@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>우리 가족 | 여행 추억</title>
     <link rel="icon" href="icon-512.png">
     <link rel="manifest" href="manifest.json">
@@ -22,6 +22,7 @@
     <ul class="topbar-nav">
         <li><a href="home.html">홈</a></li>
         <li><a href="calendar.html">캘린더</a></li>
+        <li><a href="schedule.html">시간표</a></li>
         <li><a href="travel.html" class="active">여행 추억</a></li>
         <li><a href="board.html">게시판</a></li>
     </ul>
@@ -29,8 +30,15 @@
 </nav>
 
 <div class="page-wrap">
-    <h1 class="page-title">여행 추억</h1>
-    <p class="page-sub">다녀온 여행을 지도 위에 기록하고 사진을 남겨요.</p>
+    <div class="page-header-band">
+        <div class="page-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.5s7-6.6 7-12A7 7 0 0 0 5 9.5c0 5.4 7 12 7 12Z"/><circle cx="12" cy="9.3" r="2.4"/></svg>
+        </div>
+        <div class="page-header-text">
+            <h1>여행 추억</h1>
+            <p>다녀온 여행을 지도 위에 기록하고 사진을 남겨요.</p>
+        </div>
+    </div>
 
     <div id="travel-map"></div>
 
@@ -59,7 +67,7 @@
                 <label>날짜</label>
                 <div class="hybrid-input">
                     <input type="text" id="trip-date" inputmode="numeric" placeholder="예: 2026-03-15" required>
-                    <button type="button" class="hybrid-pick-btn" data-for="trip-date-native" aria-label="달력에서 선택">📅</button>
+                    <button type="button" class="hybrid-pick-btn" data-for="trip-date-native" aria-label="달력에서 선택"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M3.5 9.5h17"/><path d="M8 3v3.2M16 3v3.2"/></svg></button>
                 </div>
                 <input type="date" id="trip-date-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
             </div>

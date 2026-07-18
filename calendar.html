@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>우리 가족 | 캘린더</title>
     <link rel="icon" href="icon-512.png">
     <link rel="manifest" href="manifest.json">
@@ -21,6 +21,7 @@
     <ul class="topbar-nav">
         <li><a href="home.html">홈</a></li>
         <li><a href="calendar.html" class="active">캘린더</a></li>
+        <li><a href="schedule.html">시간표</a></li>
         <li><a href="travel.html">여행 추억</a></li>
         <li><a href="board.html">게시판</a></li>
     </ul>
@@ -28,8 +29,15 @@
 </nav>
 
 <div class="page-wrap">
-    <h1 class="page-title">가족 캘린더</h1>
-    <p class="page-sub">생일, 모임, 여행 일정을 함께 확인해요.</p>
+    <div class="page-header-band">
+        <div class="page-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M3.5 9.5h17"/><path d="M8 3v3.2M16 3v3.2"/><path d="M8 13.2h.01M12 13.2h.01M16 13.2h.01M8 17h.01M12 17h.01"/></svg>
+        </div>
+        <div class="page-header-text">
+            <h1>가족 캘린더</h1>
+            <p>생일, 모임, 여행 일정을 함께 확인해요.</p>
+        </div>
+    </div>
 
     <div class="cal-header">
         <button class="cal-nav-btn" id="cal-prev">‹</button>
@@ -65,7 +73,7 @@
                 <label>날짜</label>
                 <div class="hybrid-input">
                     <input type="text" id="event-date" inputmode="numeric" placeholder="예: 2026-03-15" required>
-                    <button type="button" class="hybrid-pick-btn" data-for="event-date-native" aria-label="달력에서 선택">📅</button>
+                    <button type="button" class="hybrid-pick-btn" data-for="event-date-native" aria-label="달력에서 선택"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M3.5 9.5h17"/><path d="M8 3v3.2M16 3v3.2"/></svg></button>
                 </div>
                 <input type="date" id="event-date-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
             </div>
@@ -77,7 +85,7 @@
                 <label>시간 (선택)</label>
                 <div class="hybrid-input">
                     <input type="text" id="event-time" list="time-suggestions" inputmode="numeric" placeholder="예: 18:30">
-                    <button type="button" class="hybrid-pick-btn" data-for="event-time-native" aria-label="시간 선택">🕐</button>
+                    <button type="button" class="hybrid-pick-btn" data-for="event-time-native" aria-label="시간 선택"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></button>
                 </div>
                 <input type="time" id="event-time-native" class="native-picker-hidden" tabindex="-1" aria-hidden="true">
                 <datalist id="time-suggestions">
