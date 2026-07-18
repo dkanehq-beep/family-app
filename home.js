@@ -4,6 +4,14 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
+// ✨ 앱을 열 때마다 잠깐 보이는 인사말 스플래시
+setTimeout(function() {
+    const splash = document.getElementById("app-splash");
+    if (!splash) return;
+    splash.classList.add("splash-hide");
+    setTimeout(function() { splash.style.display = "none"; }, 500);
+}, 1300);
+
 function formatAnnounceDate(ts) {
     if (!ts || !ts.toDate) return "";
     const d = ts.toDate();

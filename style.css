@@ -427,6 +427,48 @@ a { color: inherit; }
     font-weight: 300;
 }
 
+/* ✨ 앱 스플래시 (켤 때마다 잠깐 보이는 인사말) */
+.app-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background: linear-gradient(160deg, #241713 0%, #4a2818 45%, #c9663a 100%);
+    transition: opacity 0.5s ease;
+}
+.app-splash.splash-hide { opacity: 0; pointer-events: none; }
+.splash-icon {
+    width: 84px;
+    height: 84px;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    animation: splashPop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.splash-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.splash-greeting {
+    color: #fdf8f2;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    padding: 0 30px;
+    opacity: 0;
+    animation: splashFadeIn 0.5s ease 0.2s forwards;
+}
+@keyframes splashPop {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+@keyframes splashFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* ===== 홈 대시보드 ===== */
 .home-hero {
     text-align: center;
