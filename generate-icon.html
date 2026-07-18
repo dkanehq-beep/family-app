@@ -6,36 +6,42 @@
 <style>
     body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #fffaf5; }
     canvas { border-radius: 24px; box-shadow: 0 12px 32px rgba(61,43,31,0.18); margin-bottom: 20px; background: #eee; }
-    button { font-size: 16px; padding: 14px 28px; border-radius: 10px; border: none; background: #e8734a; color: #fff; cursor: pointer; margin: 6px; }
+    button { font-size: 16px; padding: 14px 28px; border-radius: 10px; border: none; background: #e8734a; color: #fff; cursor: pointer; margin: 6px; transition: opacity 0.2s; }
     button:hover { background: #c85a35; }
+    button:disabled { opacity: 0.4; cursor: default; background: #bbb; }
     p { color: #555; line-height: 1.6; }
-    .slider-wrap { max-width: 400px; margin: 0 auto 24px auto; }
+    .slider-wrap { max-width: 400px; margin: 0 auto 16px auto; }
     input[type="range"] { width: 100%; }
+    #status { font-weight: 700; margin-bottom: 20px; }
+    #status.ready { color: #2e8b57; }
+    #status.loading { color: #c85a35; }
 </style>
 </head>
 <body>
 <h2>👦👧 아이들 사진으로 아이콘 만들기</h2>
-<p>정사각형 미리보기예요. 슬라이더로 위/아래 위치를 맞춘 다음 다운로드하세요.</p>
+<p>정사각형 미리보기예요. 슬라이더로 위치를 맞춘 다음 다운로드하세요.</p>
+<p id="status" class="loading">⏳ 사진 불러오는 중... (잠시만 기다려주세요)</p>
 
 <canvas id="c" width="512" height="512"></canvas>
 
 <div class="slider-wrap">
-    <label>위/아래 위치 조절</label>
-    <input type="range" id="posSlider" min="0" max="100" value="30">
+    <label id="sliderLabel">위치 조절</label>
+    <input type="range" id="posSlider" min="0" max="100" value="30" disabled>
 </div>
 
 <div>
-    <button id="dl512">icon-512.png 다운로드</button>
-    <button id="dl180">icon-180.png 다운로드 (아이폰용)</button>
+    <button id="dl512" disabled>icon-512.png 다운로드</button>
+    <button id="dl180" disabled>icon-180.png 다운로드 (아이폰용)</button>
 </div>
 
 <script>
     const img = new Image();
-    img.src = "icon-source.avif";
-
     const previewCanvas = document.getElementById("c");
     const previewCtx = previewCanvas.getContext("2d");
     const slider = document.getElementById("posSlider");
+    const statusEl = document.getElementById("status");
+    const dl512Btn = document.getElementById("dl512");
+    const dl180Btn = document.getElementById("dl180");
 
     function roundedRectPath(ctx, x, y, w, h, r) {
         if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); return; }
@@ -48,34 +54,52 @@
         ctx.closePath();
     }
 
+    // "cover"처럼 짧은 쪽 기준으로 꽉 채우고, 남는 쪽(긴 쪽)만큼만 슬라이더로 움직임
+    function getCoverParams(size) {
+        const scale = Math.max(size / img.width, size / img.height);
+        const scaledW = img.width * scale;
+        const scaledH = img.height * scale;
+        const maxOffsetX = Math.max(0, scaledW - size);
+        const maxOffsetY = Math.max(0, scaledH - size);
+        return { scaledW: scaledW, scaledH: scaledH, maxOffsetX: maxOffsetX, maxOffsetY: maxOffsetY };
+    }
+
     function drawIcon(ctx, size, posRatio) {
-        // 배경 (이미지 로드 전 대비)
         roundedRectPath(ctx, 0, 0, size, size, size * 0.22);
         ctx.save();
         ctx.clip();
         ctx.fillStyle = "#e8734a";
         ctx.fillRect(0, 0, size, size);
 
-        const scale = size / img.width;
-        const scaledW = size;
-        const scaledH = img.height * scale;
-        const maxOffset = Math.max(0, scaledH - size);
-        const yOffset = maxOffset * (posRatio / 100);
+        const p = getCoverParams(size);
+        let dx = 0, dy = 0;
+        if (p.maxOffsetY >= p.maxOffsetX && p.maxOffsetY > 0) {
+            dy = -p.maxOffsetY * (posRatio / 100);
+        } else if (p.maxOffsetX > 0) {
+            dx = -p.maxOffsetX * (posRatio / 100);
+        }
 
-        ctx.drawImage(img, 0, -yOffset, scaledW, scaledH);
+        ctx.drawImage(img, dx, dy, p.scaledW, p.scaledH);
 
         // 은은한 하단 그라데이션 (톤 정리)
-        const shadow = ctx.createLinearGradient(0, size * 0.7, 0, size);
+        const shadow = ctx.createLinearGradient(0, size * 0.65, 0, size);
         shadow.addColorStop(0, "rgba(60,30,10,0)");
-        shadow.addColorStop(1, "rgba(60,30,10,0.18)");
+        shadow.addColorStop(1, "rgba(60,30,10,0.22)");
         ctx.fillStyle = shadow;
+        ctx.fillRect(0, 0, size, size);
+
+        // 은은한 상단 광택 (고급스러운 느낌)
+        const glow = ctx.createRadialGradient(size * 0.3, size * 0.2, 0, size * 0.3, size * 0.2, size * 0.8);
+        glow.addColorStop(0, "rgba(255,255,255,0.18)");
+        glow.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = glow;
         ctx.fillRect(0, 0, size, size);
 
         ctx.restore();
 
         // 테두리
         roundedRectPath(ctx, size * 0.01, size * 0.01, size * 0.98, size * 0.98, size * 0.21);
-        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.strokeStyle = "rgba(255,255,255,0.55)";
         ctx.lineWidth = size * 0.012;
         ctx.stroke();
     }
@@ -85,7 +109,48 @@
         drawIcon(previewCtx, 512, Number(slider.value));
     }
 
-    img.onload = renderPreview;
+    function markReady() {
+        statusEl.textContent = "✅ 사진 준비 완료! 아래에서 위치 맞추고 다운로드하세요.";
+        statusEl.className = "ready";
+
+        const p = getCoverParams(512);
+        const sliderWrap = document.querySelector(".slider-wrap");
+        const sliderLabel = document.getElementById("sliderLabel");
+        if (p.maxOffsetY >= p.maxOffsetX && p.maxOffsetY > 0) {
+            sliderLabel.textContent = "위/아래 위치 조절";
+            sliderWrap.style.display = "block";
+        } else if (p.maxOffsetX > 0) {
+            sliderLabel.textContent = "좌/우 위치 조절";
+            sliderWrap.style.display = "block";
+        } else {
+            sliderWrap.style.display = "none";
+        }
+
+        slider.disabled = false;
+        dl512Btn.disabled = false;
+        dl180Btn.disabled = false;
+        renderPreview();
+    }
+
+    function markError() {
+        statusEl.textContent = "❌ icon-source.avif 파일을 못 찾았어요. family-app 폴더 안에 있는지 확인해주세요.";
+        statusEl.className = "loading";
+    }
+
+    img.onerror = markError;
+    img.src = "icon-source.avif";
+
+    // decode()로 픽셀 데이터까지 완전히 준비된 걸 확실히 기다림 (onload보다 안전)
+    if (img.decode) {
+        img.decode().then(markReady).catch(function() {
+            // decode 실패해도 onload가 이미 됐으면 진행
+            if (img.complete && img.naturalWidth > 0) markReady();
+            else markError();
+        });
+    } else {
+        img.onload = markReady;
+    }
+
     slider.addEventListener("input", renderPreview);
 
     function downloadIcon(size, filename) {
@@ -100,12 +165,8 @@
         link.click();
     }
 
-    document.getElementById("dl512").addEventListener("click", function() {
-        downloadIcon(512, "icon-512.png");
-    });
-    document.getElementById("dl180").addEventListener("click", function() {
-        downloadIcon(180, "icon-180.png");
-    });
+    dl512Btn.addEventListener("click", function() { downloadIcon(512, "icon-512.png"); });
+    dl180Btn.addEventListener("click", function() { downloadIcon(180, "icon-180.png"); });
 </script>
 </body>
 </html>
