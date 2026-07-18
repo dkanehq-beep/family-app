@@ -9,8 +9,8 @@ setTimeout(function() {
     const splash = document.getElementById("app-splash");
     if (!splash) return;
     splash.classList.add("splash-hide");
-    setTimeout(function() { splash.style.display = "none"; }, 500);
-}, 1300);
+    setTimeout(function() { splash.style.display = "none"; }, 600);
+}, 2000);
 
 function formatAnnounceDate(ts) {
     if (!ts || !ts.toDate) return "";
