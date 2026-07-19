@@ -1476,3 +1476,74 @@ body.dark-mode .tabbar { background: rgba(37, 29, 25, 0.94); }
     .fab { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
     .pwa-install-banner { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* 🗓️ 캘린더 표정 살리기 - 요일 색 / 공휴일 / 오늘 강조 */
+.cal-weekdays div:first-child { color: #cf5b43; }          /* 일요일 헤더는 빨강 */
+.cal-weekdays div:last-child { color: var(--blue); }        /* 토요일 헤더는 파랑 */
+.cal-day.sun .cal-day-num,
+.cal-day.holiday .cal-day-num { color: #cf5b43; font-weight: 700; }  /* 일요일·공휴일 숫자 빨강 */
+.cal-day.sat .cal-day-num { color: var(--blue); }
+body.dark-mode .cal-day.sun .cal-day-num,
+body.dark-mode .cal-day.holiday .cal-day-num,
+body.dark-mode .cal-weekdays div:first-child { color: #f0846b; }  /* 다크모드에선 더 밝은 빨강 */
+.cal-holiday-name {
+    display: block;
+    font-size: 8.5px;
+    font-weight: 700;
+    color: #cf5b43;
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+body.dark-mode .cal-holiday-name { color: #f0846b; }
+/* 오늘 날짜: 배경 대신 숫자에 원형 배지 (네이티브 캘린더 느낌) */
+.cal-day.today { background: none; }
+.cal-day.today .cal-day-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff !important;   /* 일요일과 겹쳐도 흰 글자 유지 */
+    font-weight: 800;
+}
+
+/* ✨ 빈 화면(데이터 없을 때)을 카드 형태로 다듬기 */
+.empty-hint {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12.5px;
+    padding: 34px 18px;
+    font-weight: 300;
+    line-height: 1.7;
+    background: var(--card-bg);
+    border: 1.5px dashed var(--border-accent);
+    border-radius: 16px;
+}
+.empty-hint::before {
+    content: '✦';
+    display: block;
+    font-size: 17px;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+
+/* ✨ 페이지 헤더 배너 장식 - 우상단에서 퍼지는 동심원 링 */
+.page-header-band::after,
+.home-hero::after {
+    content: '';
+    position: absolute;
+    right: -28px;
+    top: -46px;
+    width: 130px;
+    height: 130px;
+    border: 1.5px solid rgba(253, 248, 242, 0.14);
+    border-radius: 50%;
+    /* box-shadow 겹치기로 링을 두 겹 더 그린다 */
+    box-shadow: 0 0 0 34px rgba(253, 248, 242, 0.05),
+                0 0 0 74px rgba(253, 248, 242, 0.03);
+    pointer-events: none;
+}

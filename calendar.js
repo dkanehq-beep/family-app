@@ -13,6 +13,41 @@ bindHybridPicker("event-date", "event-date-native", '[data-for="event-date-nativ
 bindHybridPicker("event-end-date", "event-end-date-native", '[data-for="event-end-date-native"]');
 bindHybridPicker("event-time", "event-time-native", '[data-for="event-time-native"]');
 
+// ✨ 한국 공휴일
+// 날짜가 매년 고정인 공휴일 ("월-일": 이름)
+const FIXED_HOLIDAYS = {
+    "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일",
+    "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "성탄절"
+};
+// 음력 기준이라 매년 바뀌는 공휴일 + 대체공휴일 (연도별로 등록, 새 연도는 여기에 추가)
+const LUNAR_HOLIDAYS = {
+    2025: {
+        "01-27": "임시공휴일", "01-28": "설날 연휴", "01-29": "설날", "01-30": "설날 연휴",
+        "03-03": "대체공휴일", "05-06": "대체공휴일",
+        "10-05": "추석 연휴", "10-06": "추석", "10-07": "추석 연휴", "10-08": "대체공휴일"
+    },
+    2026: {
+        "02-16": "설날 연휴", "02-17": "설날", "02-18": "설날 연휴",
+        "03-02": "대체공휴일", "05-24": "석가탄신일", "05-25": "대체공휴일",
+        "08-17": "대체공휴일",
+        "09-24": "추석 연휴", "09-25": "추석", "09-26": "추석 연휴",
+        "10-05": "대체공휴일"
+    },
+    2027: {
+        "02-05": "설날 연휴", "02-06": "설날", "02-07": "설날 연휴", "02-08": "대체공휴일",
+        "05-13": "석가탄신일", "08-16": "대체공휴일",
+        "09-14": "추석 연휴", "09-15": "추석", "09-16": "추석 연휴",
+        "10-04": "대체공휴일", "10-11": "대체공휴일", "12-27": "대체공휴일"
+    }
+};
+
+// 해당 날짜가 공휴일이면 이름을, 아니면 null을 돌려준다
+function getHoliday(y, m, d) { // m: 0-11
+    const md = `${pad2(m + 1)}-${pad2(d)}`;
+    const lunar = LUNAR_HOLIDAYS[y] || {};
+    return lunar[md] || FIXED_HOLIDAYS[md] || null;
+}
+
 // ✨ 여러 날짜 일정 지원: 이 날짜가 일정 기간(date~endDate) 안에 포함되는지
 function eventCoversDate(ev, key) {
     const end = ev.endDate || ev.date;
@@ -48,10 +83,26 @@ function renderCalendar() {
         const cell = document.createElement("div");
         cell.className = "cal-day" + (key === todayKey ? " today" : "");
 
+        // 요일 계산: (첫날의 요일 + 날짜 - 1) % 7 → 0=일요일, 6=토요일
+        const weekdayIdx = (firstDay + d - 1) % 7;
+        if (weekdayIdx === 0) cell.classList.add("sun");
+        if (weekdayIdx === 6) cell.classList.add("sat");
+
+        const holidayName = getHoliday(calYear, calMonth, d);
+        if (holidayName) cell.classList.add("holiday");
+
         const num = document.createElement("div");
         num.className = "cal-day-num";
         num.textContent = d;
         cell.appendChild(num);
+
+        // 공휴일이면 숫자 아래에 작은 이름표 표시 (예: 설날, 광복절)
+        if (holidayName) {
+            const tag = document.createElement("span");
+            tag.className = "cal-holiday-name";
+            tag.textContent = holidayName;
+            cell.appendChild(tag);
+        }
 
         const dayEvents = allEvents.filter(function(ev) { return eventCoversDate(ev, key); });
         dayEvents.slice(0, 3).forEach(function(ev) {

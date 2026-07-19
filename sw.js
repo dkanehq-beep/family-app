@@ -1,5 +1,5 @@
 // 캐시 이름의 버전을 올리면 예전 캐시가 통째로 버려지고 새로 받아진다
-const CACHE_NAME = 'family-app-v2';
+const CACHE_NAME = 'family-app-v3';
 const CORE_ASSETS = [
   './',
   './index.html',
