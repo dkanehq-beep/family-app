@@ -11,11 +11,13 @@
     --card-bg: #fffdfb;
     --text-main: #2c2420;
     --text-muted: #8d7d70;
-    --border-light: rgba(44, 36, 32, 0.09);
+    --border-light: rgba(44, 36, 32, 0.08);
     --border-accent: rgba(201, 102, 58, 0.25);
-    --shadow-sm: 0 2px 14px rgba(44, 36, 32, 0.05);
-    --shadow-md: 0 14px 30px rgba(44, 36, 32, 0.08);
-    --shadow-lg: 0 26px 60px rgba(44, 36, 32, 0.16);
+    /* 그림자를 더 낮고 넓게 퍼뜨려서 또렷한 경계 대신 부드럽게 스며드는 느낌으로 */
+    --shadow-sm: 0 3px 18px rgba(44, 36, 32, 0.045);
+    --shadow-md: 0 16px 36px rgba(44, 36, 32, 0.07);
+    --shadow-lg: 0 30px 70px rgba(44, 36, 32, 0.14);
+    --ease-soft: cubic-bezier(0.25, 1, 0.5, 1);  /* 부드럽게 감속하는 공통 이징 */
 }
 
 /* 🌙 다크 모드 */
@@ -755,11 +757,11 @@ a { color: inherit; }
     color: #fdf8f2;
     border: none;
     padding: 12px 22px;
-    border-radius: 11px;
+    border-radius: 14px;
     font-size: 13.5px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.25s;
+    transition: background-color 0.3s var(--ease-soft), transform 0.3s var(--ease-soft);
 }
 .btn-primary:hover { background-color: var(--primary); }
 .btn-primary:active { transform: scale(0.97); transition-duration: 0.1s; }
@@ -768,7 +770,7 @@ a { color: inherit; }
     border: 1px solid var(--border-light);
     color: var(--text-main);
     padding: 12px 22px;
-    border-radius: 11px;
+    border-radius: 14px;
     font-size: 13.5px;
     font-weight: 700;
     cursor: pointer;
@@ -1186,14 +1188,14 @@ a { color: inherit; }
     height: 46px;
     padding: 0 14px;
     border: 1px solid var(--border-light);
-    border-radius: 10px;
+    border-radius: 13px;
     font-size: 13px;
     line-height: 46px;
     outline: none;
     background: var(--bg-main);
     color: var(--text-main);
     resize: vertical;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.25s var(--ease-soft), box-shadow 0.25s var(--ease-soft);
     -webkit-appearance: none;
     appearance: none;
 }
@@ -1394,50 +1396,64 @@ a { color: inherit; }
     padding: 4px;
 }
 
-/* 📱 하단 탭바 (모바일 전용 - 640px 이하에서만 표시) */
+/* 📱 하단 탭바 (모바일 전용) - 화면에서 띄운 플로팅 알약 스타일 */
 .tabbar {
     position: fixed;          /* 스크롤해도 화면 하단에 고정 */
-    left: 0; right: 0; bottom: 0;
+    left: 14px; right: 14px;
+    /* 화면 맨 바닥이 아니라 살짝 띄워서 '떠 있는' 느낌 + 아이폰 홈바 회피 */
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     z-index: 95;              /* 콘텐츠보다 위, 모달(1000+)보다는 아래 */
     display: none;            /* 기본은 숨김, 아래 미디어쿼리에서 모바일일 때만 표시 */
-    background: rgba(255, 253, 251, 0.94);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border-top: 1px solid var(--border-light);
-    /* env(safe-area-inset-bottom): 아이폰 하단 홈바 영역만큼 여백 자동 확보 */
-    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)) 4px;
+    max-width: 460px;
+    margin: 0 auto;
+    background: rgba(255, 253, 251, 0.85);
+    backdrop-filter: blur(26px) saturate(1.5);
+    -webkit-backdrop-filter: blur(26px) saturate(1.5);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 26px;
+    box-shadow: 0 12px 38px rgba(44, 36, 32, 0.16), 0 2px 10px rgba(44, 36, 32, 0.06);
+    padding: 7px 6px;
 }
-body.dark-mode .tabbar { background: rgba(37, 29, 25, 0.94); }
+body.dark-mode .tabbar {
+    background: rgba(37, 29, 25, 0.88);
+    border-color: rgba(242, 233, 226, 0.08);
+    box-shadow: 0 12px 38px rgba(0, 0, 0, 0.55);
+}
 .tabbar-inner {
     display: grid;
     grid-template-columns: repeat(6, 1fr);  /* 6개 탭을 균등 분할 */
-    max-width: 520px;
-    margin: 0 auto;
 }
 .tabbar a {
     display: flex;
     flex-direction: column;   /* 아이콘 위, 글자 아래 세로 배치 */
     align-items: center;
     gap: 3px;
-    padding: 6px 2px;
+    padding: 7px 2px 6px 2px;
+    border-radius: 17px;
     text-decoration: none;
     color: var(--text-muted);
     font-size: 9.5px;
     font-weight: 600;
-    transition: color 0.2s;
+    transition: color 0.25s, background 0.25s,
+                transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); /* 통통 튀는 스프링 곡선 */
 }
-.tabbar a svg { width: 21px; height: 21px; }
-.tabbar a.active { color: var(--primary); }   /* 현재 페이지 탭만 포인트 컬러 */
-.tabbar a:active { transform: scale(0.92); }  /* 누르는 순간 살짝 움츠러드는 반응 */
+.tabbar a svg { width: 21px; height: 21px; transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.tabbar a.active {
+    color: var(--primary);
+    background: var(--primary-light);   /* 활성 탭 뒤에 은은한 알약 배경 */
+    font-weight: 700;
+}
+.tabbar a.active svg { transform: translateY(-1px) scale(1.06); }
+.tabbar a:active { transform: scale(0.9); }   /* 누르는 순간 살짝 움츠러드는 반응 */
 
 @media (max-width: 640px) {
     .tabbar { display: block; }
     .topbar-nav { display: none; }     /* 모바일에선 상단 메뉴 대신 탭바 사용 */
     .topbar { flex-wrap: nowrap; }     /* 메뉴가 사라졌으니 상단바는 한 줄로 */
-    /* 탭바에 콘텐츠/버튼이 가려지지 않게 바닥 여백 확보 */
-    .page-wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
-    .fab { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
-    .pwa-install-banner { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+    /* 탭바가 화면 바닥에서 12px 띄워진 플로팅 알약이라, 여백도 그만큼 더 확보 */
+    .page-wrap { padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
+    .fab { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+    .pwa-install-banner { bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* 🗓️ 캘린더 표정 살리기 - 요일 색 / 공휴일 / 오늘 강조 */
