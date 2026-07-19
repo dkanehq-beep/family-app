@@ -929,6 +929,7 @@ a { color: inherit; }
 }
 .day-field-input {
     flex: 1;
+    min-width: 0;  /* 입력창은 기본적으로 최소 크기가 커서 flex로 줄어들지 않고 옆의 저장 버튼을 밀어내는데, 이걸로 방지 */
     height: 38px;
     padding: 0 12px;
     border: 1px solid var(--border-light);
