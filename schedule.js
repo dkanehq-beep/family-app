@@ -136,7 +136,10 @@ function renderWeekDays() {
                         : dayHomework.map(function(h) {
                             return `
                                 <div class="homework-item${h.done ? " done" : ""}" data-id="${h.id}">
-                                    <span class="homework-check"></span>
+                                    <label class="toggle-switch sm homework-toggle">
+                                        <input type="checkbox" class="homework-toggle-input" data-id="${h.id}" ${h.done ? "checked" : ""}>
+                                        <span class="toggle-track"></span>
+                                    </label>
                                     <span class="homework-text">${escapeHtml(h.title)}</span>
                                     ${isOwner(h) ? `<button type="button" class="homework-del" data-id="${h.id}">✕</button>` : ""}
                                 </div>
@@ -183,15 +186,25 @@ function bindHomeworkEvents() {
             homeworkModal.classList.add("open");
         });
     });
-    document.querySelectorAll(".homework-check, .homework-text").forEach(function(el) {
+    function toggleHomework(id, newDone) {
+        const hw = allHomework.find(function(h) { return h.id === id; });
+        if (!hw) return;
+        db.collection("homework").doc(id).update({ done: newDone });
+        awardMileage(newDone ? 10 : -10, `숙제 완료: ${hw.title}`);
+    }
+    // 스위치를 직접 눌렀을 때
+    document.querySelectorAll(".homework-toggle-input").forEach(function(input) {
+        input.addEventListener("change", function() {
+            toggleHomework(input.dataset.id, input.checked);
+        });
+    });
+    // 옆의 글자를 눌러도 스위치가 같이 움직이도록
+    document.querySelectorAll(".homework-text").forEach(function(el) {
         el.addEventListener("click", function() {
             const item = el.closest(".homework-item");
-            const id = item.dataset.id;
-            const hw = allHomework.find(function(h) { return h.id === id; });
-            if (!hw) return;
-            const newDone = !hw.done;
-            db.collection("homework").doc(id).update({ done: newDone });
-            awardMileage(newDone ? 10 : -10, `숙제 완료: ${hw.title}`);
+            const input = item.querySelector(".homework-toggle-input");
+            input.checked = !input.checked;
+            input.dispatchEvent(new Event("change"));
         });
     });
     document.querySelectorAll(".homework-del").forEach(function(btn) {

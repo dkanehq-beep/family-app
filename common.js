@@ -136,3 +136,15 @@ function bindHybridPicker(textId, nativeId, btnSelector) {
         textInput.value = nativeInput.value;
     });
 }
+
+// ✨ 탭바/상단 메뉴로 다른 페이지 이동할 때 뚝 끊기지 않고 부드럽게 페이드 전환
+document.querySelectorAll(".tabbar a, .topbar-nav a").forEach(function(link) {
+    link.addEventListener("click", function(e) {
+        const href = link.getAttribute("href");
+        // 이미 보고 있는 페이지를 다시 누른 거면 아무것도 안 함
+        if (!href || link.classList.contains("active")) return;
+        e.preventDefault();
+        document.body.classList.add("page-leaving");
+        setTimeout(function() { window.location.href = href; }, 180);
+    });
+});

@@ -66,6 +66,18 @@ body {
         radial-gradient(circle at 0% 100%, rgba(79, 125, 140, 0.06) 0%, transparent 42%);
     position: relative;
     touch-action: manipulation;
+    animation: pageFadeIn 0.32s var(--ease-soft);  /* 페이지가 열릴 때 은은하게 떠오르며 등장 */
+}
+
+/* 탭바/상단 메뉴로 다른 페이지를 누르는 순간, 이동하기 직전에 살짝 사라지는 연출 */
+body.page-leaving {
+    opacity: 0;
+    transition: opacity 0.18s ease;
+}
+
+@keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 a { color: inherit; }
@@ -960,29 +972,11 @@ a { color: inherit; }
     border-radius: 9px;
     padding: 9px 10px;
 }
-.homework-check {
-    width: 17px; height: 17px;
-    border-radius: 5px;
-    border: 1.5px solid rgba(44, 36, 32, 0.25);
-    flex-shrink: 0;
-    cursor: pointer;
-    position: relative;
-    background: #fff;
-    transition: all 0.2s;
-}
-.homework-item.done .homework-check {
-    background: linear-gradient(135deg, #e2935f, var(--primary-dark));
-    border-color: var(--primary-dark);
-}
-.homework-item.done .homework-check::after {
-    content: '';
-    position: absolute;
-    left: 4.5px; top: 1.5px;
-    width: 4px; height: 8px;
-    border: solid #fff;
-    border-width: 0 1.6px 1.6px 0;
-    transform: rotate(45deg);
-}
+/* 숙제 완료 스위치 - 로그인 화면의 토글과 같은 부품을 작은 크기로 재사용 */
+.toggle-switch.sm { width: 32px; height: 18px; }
+.toggle-switch.sm .toggle-track::before { width: 14px; height: 14px; }
+.toggle-switch.sm input:checked + .toggle-track::before { transform: translateX(14px); }
+.homework-toggle { flex-shrink: 0; }
 .homework-text {
     flex: 1;
     font-size: 12.5px;
