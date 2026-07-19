@@ -110,17 +110,21 @@ function renderTodaySummary() {
     }).join("");
 }
 
-db.collection("kids").orderBy("createdAt").onSnapshot(function(snapshot) {
-    todayKids = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
-    renderTodaySummary();
-});
-db.collection("weekly_schedule").onSnapshot(function(snapshot) {
-    todaySchedule = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
-    renderTodaySummary();
-});
-db.collection("homework").onSnapshot(function(snapshot) {
-    todayHomework = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
-    renderTodaySummary();
+// 화면 틀은 데이터 도착 전에 즉시 그리고, 구독은 로그인 확인 후 시작
+renderTodaySummary();
+whenAuthReady(function() {
+    db.collection("kids").orderBy("createdAt").onSnapshot(function(snapshot) {
+        todayKids = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderTodaySummary();
+    });
+    db.collection("weekly_schedule").onSnapshot(function(snapshot) {
+        todaySchedule = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderTodaySummary();
+    });
+    db.collection("homework").onSnapshot(function(snapshot) {
+        todayHomework = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderTodaySummary();
+    });
 });
 
 // ✨ 가족 투표
@@ -183,17 +187,20 @@ function watchPollVotes(pollId) {
     });
 }
 
-db.collection("polls").orderBy("createdAt", "desc").limit(1).onSnapshot(function(snapshot) {
-    if (snapshot.empty) {
-        currentPoll = null;
-        currentPollVotes = [];
+renderPollWidget();
+whenAuthReady(function() {
+    db.collection("polls").orderBy("createdAt", "desc").limit(1).onSnapshot(function(snapshot) {
+        if (snapshot.empty) {
+            currentPoll = null;
+            currentPollVotes = [];
+            renderPollWidget();
+            return;
+        }
+        const doc = snapshot.docs[0];
+        currentPoll = Object.assign({ id: doc.id }, doc.data());
+        watchPollVotes(currentPoll.id);
         renderPollWidget();
-        return;
-    }
-    const doc = snapshot.docs[0];
-    currentPoll = Object.assign({ id: doc.id }, doc.data());
-    watchPollVotes(currentPoll.id);
-    renderPollWidget();
+    });
 });
 
 const pollModal = document.getElementById("poll-modal");
@@ -274,10 +281,13 @@ announceForm.addEventListener("submit", function(e) {
     });
 });
 
-// ✨ Firestore 실시간 동기화
-db.collection("announcements").orderBy("createdAt", "desc").onSnapshot(function(snapshot) {
-    allAnnouncements = snapshot.docs.map(function(doc) {
-        return Object.assign({ id: doc.id }, doc.data());
+// ✨ Firestore 실시간 동기화 — 로그인 확인 후 구독 시작
+renderAnnouncements();
+whenAuthReady(function() {
+    db.collection("announcements").orderBy("createdAt", "desc").onSnapshot(function(snapshot) {
+        allAnnouncements = snapshot.docs.map(function(doc) {
+            return Object.assign({ id: doc.id }, doc.data());
+        });
+        renderAnnouncements();
     });
-    renderAnnouncements();
 });

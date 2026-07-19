@@ -139,10 +139,13 @@ postForm.addEventListener("submit", function(e) {
     });
 });
 
-// ✨ Firestore 실시간 동기화
-db.collection("posts").orderBy("createdAt", "desc").onSnapshot(function(snapshot) {
-    allPosts = snapshot.docs.map(function(doc) {
-        return Object.assign({ id: doc.id }, doc.data());
+// ✨ Firestore 실시간 동기화 — 로그인 확인 후 구독 시작
+renderBoardList();
+whenAuthReady(function() {
+    db.collection("posts").orderBy("createdAt", "desc").onSnapshot(function(snapshot) {
+        allPosts = snapshot.docs.map(function(doc) {
+            return Object.assign({ id: doc.id }, doc.data());
+        });
+        renderBoardList();
     });
-    renderBoardList();
 });

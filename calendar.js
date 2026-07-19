@@ -201,11 +201,21 @@ document.getElementById("cal-next").addEventListener("click", function() {
     renderCalendar();
 });
 
-// ✨ Firestore 실시간 동기화
-db.collection("events").orderBy("date").onSnapshot(function(snapshot) {
-    allEvents = snapshot.docs.map(function(doc) {
-        return Object.assign({ id: doc.id }, doc.data());
+// ✨ 달력 틀은 데이터 도착을 기다리지 않고 즉시 그린다 (일정은 나중에 채워짐)
+renderCalendar();
+renderUpcoming();
+
+// ✨ Firestore 실시간 동기화 — 로그인 확인이 끝난 뒤에만 구독 시작
+whenAuthReady(function() {
+    db.collection("events").orderBy("date").onSnapshot(function(snapshot) {
+        allEvents = snapshot.docs.map(function(doc) {
+            return Object.assign({ id: doc.id }, doc.data());
+        });
+        renderCalendar();
+        renderUpcoming();
+    }, function(err) {
+        // 구독이 실패해도 조용히 넘어가지 않고 사용자에게 알림
+        showToast("일정을 불러오지 못했어요. 앱을 새로고침해 주세요.");
+        console.error("events 구독 실패:", err.message);
     });
-    renderCalendar();
-    renderUpcoming();
 });

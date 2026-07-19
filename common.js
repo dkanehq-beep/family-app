@@ -1,4 +1,14 @@
 // ✨ 로그인 안 되어 있으면 로그인 페이지로 돌려보내기
+// + 로그인 확인이 끝나기 "전"에 데이터 요청이 나가면 보안 규칙에 막혀 화면이
+//   빈 채로 남는 문제가 있어서, 데이터 구독은 반드시 whenAuthReady() 안에서 시작
+let _authUser = null;                // 로그인 확인이 끝나면 사용자 정보가 여기 담김
+const _authReadyCallbacks = [];      // 로그인 확인을 기다리는 작업 대기줄
+
+function whenAuthReady(cb) {
+    if (_authUser) { cb(_authUser); return; }  // 이미 확인 끝났으면 바로 실행
+    _authReadyCallbacks.push(cb);              // 아니면 대기줄에 등록
+}
+
 auth.onAuthStateChanged(function(user) {
     if (!user) {
         window.location.href = "index.html";
@@ -7,6 +17,11 @@ auth.onAuthStateChanged(function(user) {
     const heroDateEl = document.getElementById("home-hero-date");
     if (heroDateEl) {
         heroDateEl.textContent = formatTodayLong();
+    }
+    // 대기 중이던 작업(각 페이지의 데이터 구독)을 이제 실행
+    if (!_authUser) {
+        _authUser = user;
+        _authReadyCallbacks.splice(0).forEach(function(cb) { cb(user); });
     }
 });
 

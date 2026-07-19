@@ -203,12 +203,15 @@ tripForm.addEventListener("submit", function(e) {
         });
 });
 
-// ✨ Firestore 실시간 동기화
+// ✨ Firestore 실시간 동기화 — 지도는 즉시 그리고, 구독은 로그인 확인 후 시작
 initMainMap();
-db.collection("trips").onSnapshot(function(snapshot) {
-    allTrips = snapshot.docs.map(function(doc) {
-        return Object.assign({ id: doc.id }, doc.data());
+renderTripGrid();
+whenAuthReady(function() {
+    db.collection("trips").onSnapshot(function(snapshot) {
+        allTrips = snapshot.docs.map(function(doc) {
+            return Object.assign({ id: doc.id }, doc.data());
+        });
+        renderTripGrid();
+        renderMainMapMarkers();
     });
-    renderTripGrid();
-    renderMainMapMarkers();
 });

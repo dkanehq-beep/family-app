@@ -105,15 +105,19 @@ document.getElementById("payout-confirm-btn").addEventListener("click", function
         });
 });
 
-// ✨ Firestore 실시간 동기화
-db.collection("mileage").onSnapshot(function(snapshot) {
-    allMileage = snapshot.docs
-        .map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); })
-        .sort(function(a, b) { return (b.total || 0) - (a.total || 0); });
-    renderMileageList();
-});
+// ✨ Firestore 실시간 동기화 — 로그인 확인 후 구독 시작
+renderMileageList();
+renderLogList();
+whenAuthReady(function() {
+    db.collection("mileage").onSnapshot(function(snapshot) {
+        allMileage = snapshot.docs
+            .map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); })
+            .sort(function(a, b) { return (b.total || 0) - (a.total || 0); });
+        renderMileageList();
+    });
 
-db.collection("mileage_log").orderBy("createdAt", "desc").limit(30).onSnapshot(function(snapshot) {
-    allLogs = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
-    renderLogList();
+    db.collection("mileage_log").orderBy("createdAt", "desc").limit(30).onSnapshot(function(snapshot) {
+        allLogs = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderLogList();
+    });
 });

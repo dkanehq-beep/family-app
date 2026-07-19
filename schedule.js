@@ -224,25 +224,36 @@ homeworkForm.addEventListener("submit", function(e) {
     });
 });
 
-// ✨ Firestore 실시간 동기화
-db.collection("kids").orderBy("createdAt").onSnapshot(function(snapshot) {
-    allKids = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
-    if (!currentKidId && allKids.length > 0) currentKidId = allKids[0].id;
-    if (currentKidId && !allKids.find(function(k) { return k.id === currentKidId; })) {
-        currentKidId = allKids.length > 0 ? allKids[0].id : null;
-    }
-    renderKidTabs();
-    renderWeekDays();
-});
-
-db.collection("weekly_schedule").onSnapshot(function(snapshot) {
-    allSchedule = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
-    renderWeekDays();
-});
-
-db.collection("homework").onSnapshot(function(snapshot) {
-    allHomework = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
-    renderWeekDays();
-});
-
+// ✨ 화면 틀(아이 탭 + 주간 라벨)은 데이터 도착 전에 즉시 그린다
 renderWeekLabel();
+renderKidTabs();
+
+// ✨ Firestore 실시간 동기화 — 로그인 확인이 끝난 뒤에만 구독 시작
+whenAuthReady(function() {
+    function onSubError(name) {
+        return function(err) {
+            showToast("데이터를 불러오지 못했어요. 앱을 새로고침해 주세요.");
+            console.error(name + " 구독 실패:", err.message);
+        };
+    }
+
+    db.collection("kids").orderBy("createdAt").onSnapshot(function(snapshot) {
+        allKids = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        if (!currentKidId && allKids.length > 0) currentKidId = allKids[0].id;
+        if (currentKidId && !allKids.find(function(k) { return k.id === currentKidId; })) {
+            currentKidId = allKids.length > 0 ? allKids[0].id : null;
+        }
+        renderKidTabs();
+        renderWeekDays();
+    }, onSubError("kids"));
+
+    db.collection("weekly_schedule").onSnapshot(function(snapshot) {
+        allSchedule = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderWeekDays();
+    }, onSubError("weekly_schedule"));
+
+    db.collection("homework").onSnapshot(function(snapshot) {
+        allHomework = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderWeekDays();
+    }, onSubError("homework"));
+});
