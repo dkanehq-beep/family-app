@@ -10,6 +10,7 @@ let allKids = [];
 let currentKidId = null;
 let allSchedule = [];
 let allHomework = [];
+let allAcademies = [];  // 학원은 하루에 여러 곳 다닐 수 있어서 항목마다 별도 문서로 관리
 let currentMonday = getMonday(new Date());
 
 function pad2(n) { return String(n).padStart(2, "0"); }
@@ -109,6 +110,7 @@ function renderWeekDays() {
         const dateKey = formatDateKey(dateObj);
         const sched = allSchedule.find(function(s) { return s.kidId === currentKidId && s.day === i; }) || {};
         const dayHomework = allHomework.filter(function(h) { return h.kidId === currentKidId && h.date === dateKey; });
+        const dayAcademies = allAcademies.filter(function(a) { return a.kidId === currentKidId && a.day === i; });
 
         const card = document.createElement("div");
         card.className = "day-card" + (dateKey === todayKey ? " is-today" : "");
@@ -122,10 +124,25 @@ function renderWeekDays() {
                 <input type="text" class="day-field-input" data-day="${i}" data-field="dismissal" value="${escapeHtml(sched.dismissal || "")}" placeholder="예: 14:30">
                 <button type="button" class="day-field-save-btn" data-day="${i}" data-field="dismissal">저장</button>
             </div>
-            <div class="day-field">
-                <label>학원</label>
-                <input type="text" class="day-field-input" data-day="${i}" data-field="academy" value="${escapeHtml(sched.academy || "")}" placeholder="예: 영어 4~5시, 태권도 6~7시">
-                <button type="button" class="day-field-save-btn" data-day="${i}" data-field="academy">저장</button>
+            <div class="academy-section">
+                <div class="academy-header">
+                    <span>학원</span>
+                    <button type="button" class="academy-add-btn" data-day="${i}">+ 추가</button>
+                </div>
+                <div class="academy-items">
+                    ${dayAcademies.length === 0
+                        ? '<p class="academy-empty">등록된 학원이 없어요</p>'
+                        : dayAcademies.map(function(a) {
+                            const time = (a.start || a.end) ? `${a.start || "?"} ~ ${a.end || "?"}` : "시간 미등록";
+                            return `
+                                <div class="academy-item" data-id="${a.id}">
+                                    <span class="academy-name">${escapeHtml(a.name)}</span>
+                                    <span class="academy-time">${escapeHtml(time)}</span>
+                                    ${isOwner(a) ? `<button type="button" class="academy-del" data-id="${a.id}">✕</button>` : ""}
+                                </div>
+                            `;
+                        }).join("")}
+                </div>
             </div>
             <div class="homework-section">
                 <div class="homework-header">
@@ -154,6 +171,7 @@ function renderWeekDays() {
     }
 
     bindDayFieldEvents();
+    bindAcademyEvents();
     bindHomeworkEvents();
 }
 
@@ -182,6 +200,53 @@ function bindDayFieldEvents() {
         });
     });
 }
+
+// ✨ 학원 추가/삭제 (하루에 여러 곳 등록 가능)
+let academyTargetDay = null;
+const academyModal = document.getElementById("academy-modal");
+const academyForm = document.getElementById("academy-form");
+
+function bindAcademyEvents() {
+    document.querySelectorAll(".academy-add-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            academyTargetDay = Number(btn.dataset.day);
+            document.getElementById("academy-modal-title").textContent =
+                `${DAY_NAMES[academyTargetDay]} 학원 추가`;
+            academyModal.classList.add("open");
+        });
+    });
+    document.querySelectorAll(".academy-del").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            db.collection("academies").doc(btn.dataset.id).delete();
+        });
+    });
+}
+
+document.getElementById("academy-modal-close").addEventListener("click", function() { academyModal.classList.remove("open"); });
+document.getElementById("academy-cancel-btn").addEventListener("click", function() { academyModal.classList.remove("open"); });
+academyModal.addEventListener("click", function(e) { if (e.target === academyModal) academyModal.classList.remove("open"); });
+
+academyForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const name = document.getElementById("academy-name").value.trim();
+    const start = document.getElementById("academy-start").value.trim();
+    const end = document.getElementById("academy-end").value.trim();
+    db.collection("academies").add({
+        kidId: currentKidId,
+        day: academyTargetDay,
+        name: name,
+        start: start,
+        end: end,
+        ownerUid: auth.currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+        showToast("학원을 추가했어요");
+        academyModal.classList.remove("open");
+        academyForm.reset();
+    }).catch(function(err) {
+        showToast("추가에 실패했어요: " + err.message);
+    });
+});
 
 // ✨ 숙제 추가/토글/삭제
 let homeworkTargetDate = null;
@@ -281,4 +346,9 @@ whenAuthReady(function() {
         allHomework = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderWeekDays();
     }, onSubError("homework"));
+
+    db.collection("academies").onSnapshot(function(snapshot) {
+        allAcademies = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderWeekDays();
+    }, onSubError("academies"));
 });

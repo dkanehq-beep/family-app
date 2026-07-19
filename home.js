@@ -62,6 +62,7 @@ document.getElementById("announce-more-btn").addEventListener("click", function(
 let todayKids = [];
 let todaySchedule = [];
 let todayHomework = [];
+let todayAcademies = [];
 
 function pad2(n) { return String(n).padStart(2, "0"); }
 function formatDateKey(d) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }
@@ -105,9 +106,14 @@ function renderTodaySummary() {
             }
         }
 
+        const kidAcademies = todayAcademies.filter(function(a) { return a.kidId === kid.id && a.day === dayIdx; });
+
         const parts = [];
         parts.push(`하교 <b>${sched.dismissal ? escapeHtml(sched.dismissal) : "미등록"}</b>`);
-        if (sched.academy) parts.push(`학원 <b>${escapeHtml(sched.academy)}</b>`);
+        if (kidAcademies.length > 0) {
+            const names = kidAcademies.map(function(a) { return escapeHtml(a.name); }).join(", ");
+            parts.push(`학원 <b>${names}</b>`);
+        }
         parts.push(doneDays.length > 0
             ? `숙제 완료 <b>${doneDays.join(" ")}</b>`
             : "이번 주 완료한 숙제 없음");
@@ -134,6 +140,10 @@ whenAuthReady(function() {
     });
     db.collection("homework").onSnapshot(function(snapshot) {
         todayHomework = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderTodaySummary();
+    });
+    db.collection("academies").onSnapshot(function(snapshot) {
+        todayAcademies = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderTodaySummary();
     });
 });

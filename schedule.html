@@ -71,6 +71,32 @@
     </div>
 </div>
 
+<!-- 학원 추가 모달 -->
+<div class="modal-overlay" id="academy-modal">
+    <div class="modal-box">
+        <button class="modal-close-x" id="academy-modal-close">✕</button>
+        <h3 id="academy-modal-title">학원 추가</h3>
+        <form id="academy-form">
+            <div class="form-group">
+                <label>학원 이름</label>
+                <input type="text" id="academy-name" placeholder="예: 영어, 태권도" required>
+            </div>
+            <div class="form-group">
+                <label>등원 시간</label>
+                <input type="text" id="academy-start" placeholder="예: 16:00">
+            </div>
+            <div class="form-group">
+                <label>하원 시간</label>
+                <input type="text" id="academy-end" placeholder="예: 17:00">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="academy-cancel-btn">취소</button>
+                <button type="submit" class="btn-primary">추가하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- 숙제 추가 모달 -->
 <div class="modal-overlay" id="homework-modal">
     <div class="modal-box">
