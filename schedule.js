@@ -120,10 +120,12 @@ function renderWeekDays() {
             <div class="day-field">
                 <label>하교</label>
                 <input type="text" class="day-field-input" data-day="${i}" data-field="dismissal" value="${escapeHtml(sched.dismissal || "")}" placeholder="예: 14:30">
+                <button type="button" class="day-field-save-btn" data-day="${i}" data-field="dismissal">저장</button>
             </div>
             <div class="day-field">
                 <label>학원</label>
                 <input type="text" class="day-field-input" data-day="${i}" data-field="academy" value="${escapeHtml(sched.academy || "")}" placeholder="예: 영어 4~5시, 태권도 6~7시">
+                <button type="button" class="day-field-save-btn" data-day="${i}" data-field="academy">저장</button>
             </div>
             <div class="homework-section">
                 <div class="homework-header">
@@ -155,18 +157,28 @@ function renderWeekDays() {
     bindHomeworkEvents();
 }
 
-// ✨ 하교/학원 인라인 입력 저장
+// ✨ 하교/학원 입력 저장 (입력창을 벗어날 때 자동 저장 + "저장" 버튼으로 직접 저장 둘 다 지원)
+function saveDayField(day, field, value) {
+    const docId = `${currentKidId}_${day}`;
+    const data = { kidId: currentKidId, day: day };
+    data[field] = value.trim();
+    return db.collection("weekly_schedule").doc(docId).set(data, { merge: true })
+        .then(function() { showToast("저장했어요"); })
+        .catch(function(err) { showToast("저장에 실패했어요: " + err.message); });
+}
+
 function bindDayFieldEvents() {
     document.querySelectorAll(".day-field-input").forEach(function(input) {
         input.addEventListener("change", function() {
-            const day = Number(input.dataset.day);
-            const field = input.dataset.field;
-            const docId = `${currentKidId}_${day}`;
-            const data = { kidId: currentKidId, day: day };
-            data[field] = input.value.trim();
-            db.collection("weekly_schedule").doc(docId).set(data, { merge: true })
-                .then(function() { showToast("저장했어요"); })
-                .catch(function(err) { showToast("저장에 실패했어요: " + err.message); });
+            saveDayField(Number(input.dataset.day), input.dataset.field, input.value);
+        });
+    });
+    document.querySelectorAll(".day-field-save-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            const day = btn.dataset.day;
+            const field = btn.dataset.field;
+            const input = document.querySelector(`.day-field-input[data-day="${day}"][data-field="${field}"]`);
+            if (input) saveDayField(Number(day), field, input.value);
         });
     });
 }

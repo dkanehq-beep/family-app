@@ -940,6 +940,21 @@ a { color: inherit; }
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 .day-field-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(201, 102, 58, 0.1); }
+.day-field-save-btn {
+    flex-shrink: 0;
+    background: var(--primary-light);
+    border: none;
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 0 14px;
+    height: 38px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+.day-field-save-btn:hover { background: rgba(201, 102, 58, 0.18); }
+.day-field-save-btn:active { transform: scale(0.92); }
 
 .homework-section { margin-top: 14px; }
 .homework-header {

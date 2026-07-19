@@ -64,15 +64,22 @@ let todaySchedule = [];
 let todayHomework = [];
 
 function pad2(n) { return String(n).padStart(2, "0"); }
-function todayDateKey() {
-    const d = new Date();
-    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-}
+function formatDateKey(d) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }
+function todayDateKey() { return formatDateKey(new Date()); }
 function todayDayIndex() {
     // 0=월요일 ... 6=일요일 (schedule.js와 동일한 기준)
     const jsDay = new Date().getDay(); // 0=일 ... 6=토
     return jsDay === 0 ? 6 : jsDay - 1;
 }
+// 이번 주 월요일 날짜 (schedule.js의 getMonday와 동일한 계산)
+function getWeekMonday(d) {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = (day === 0 ? -6 : 1) - day;
+    date.setDate(date.getDate() + diff);
+    return date;
+}
+const WEEKDAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
 
 function renderTodaySummary() {
     const listEl = document.getElementById("today-summary-list");
@@ -81,17 +88,29 @@ function renderTodaySummary() {
         return;
     }
     const dayIdx = todayDayIndex();
-    const dKey = todayDateKey();
+    const monday = getWeekMonday(new Date());
 
     listEl.innerHTML = todayKids.map(function(kid) {
         const sched = todaySchedule.find(function(s) { return s.kidId === kid.id && s.day === dayIdx; }) || {};
-        const hw = todayHomework.filter(function(h) { return h.kidId === kid.id && h.date === dKey; });
-        const doneCount = hw.filter(function(h) { return h.done; }).length;
+
+        // 이번 주 월~일 중 등록된 숙제가 전부 완료 체크된 요일만 뱃지로 표시
+        const doneDays = [];
+        for (let i = 0; i < 7; i++) {
+            const dateObj = new Date(monday);
+            dateObj.setDate(dateObj.getDate() + i);
+            const key = formatDateKey(dateObj);
+            const dayHw = todayHomework.filter(function(h) { return h.kidId === kid.id && h.date === key; });
+            if (dayHw.length > 0 && dayHw.every(function(h) { return h.done; })) {
+                doneDays.push(WEEKDAY_LABELS[i]);
+            }
+        }
 
         const parts = [];
         parts.push(`하교 <b>${sched.dismissal ? escapeHtml(sched.dismissal) : "미등록"}</b>`);
         if (sched.academy) parts.push(`학원 <b>${escapeHtml(sched.academy)}</b>`);
-        parts.push(hw.length > 0 ? `숙제 <b>${doneCount}/${hw.length}</b> 완료` : "숙제 없음");
+        parts.push(doneDays.length > 0
+            ? `숙제 완료 <b>${doneDays.join(" ")}</b>`
+            : "이번 주 완료한 숙제 없음");
 
         return `
             <div class="today-card">
