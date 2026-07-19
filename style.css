@@ -1430,3 +1430,49 @@ a { color: inherit; }
     cursor: pointer;
     padding: 4px;
 }
+
+/* 📱 하단 탭바 (모바일 전용 - 640px 이하에서만 표시) */
+.tabbar {
+    position: fixed;          /* 스크롤해도 화면 하단에 고정 */
+    left: 0; right: 0; bottom: 0;
+    z-index: 95;              /* 콘텐츠보다 위, 모달(1000+)보다는 아래 */
+    display: none;            /* 기본은 숨김, 아래 미디어쿼리에서 모바일일 때만 표시 */
+    background: rgba(255, 253, 251, 0.94);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-top: 1px solid var(--border-light);
+    /* env(safe-area-inset-bottom): 아이폰 하단 홈바 영역만큼 여백 자동 확보 */
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)) 4px;
+}
+body.dark-mode .tabbar { background: rgba(37, 29, 25, 0.94); }
+.tabbar-inner {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);  /* 6개 탭을 균등 분할 */
+    max-width: 520px;
+    margin: 0 auto;
+}
+.tabbar a {
+    display: flex;
+    flex-direction: column;   /* 아이콘 위, 글자 아래 세로 배치 */
+    align-items: center;
+    gap: 3px;
+    padding: 6px 2px;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 9.5px;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+.tabbar a svg { width: 21px; height: 21px; }
+.tabbar a.active { color: var(--primary); }   /* 현재 페이지 탭만 포인트 컬러 */
+.tabbar a:active { transform: scale(0.92); }  /* 누르는 순간 살짝 움츠러드는 반응 */
+
+@media (max-width: 640px) {
+    .tabbar { display: block; }
+    .topbar-nav { display: none; }     /* 모바일에선 상단 메뉴 대신 탭바 사용 */
+    .topbar { flex-wrap: nowrap; }     /* 메뉴가 사라졌으니 상단바는 한 줄로 */
+    /* 탭바에 콘텐츠/버튼이 가려지지 않게 바닥 여백 확보 */
+    .page-wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+    .fab { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+    .pwa-install-banner { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+}
