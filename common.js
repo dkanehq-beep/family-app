@@ -14,6 +14,14 @@ auth.onAuthStateChanged(function(user) {
         window.location.href = "index.html";
         return;
     }
+    // 가입할 때 이름을 못 받았거나 어떤 이유로 비어있으면, 마일리지 등 여기저기에
+    // "가족"이라고만 뜨는 대신 지금 한 번 물어봐서 계정에 저장해둔다
+    if (!user.displayName) {
+        const name = window.prompt("이름을 등록해 주세요 (마일리지 등에 표시돼요)", "");
+        if (name && name.trim()) {
+            user.updateProfile({ displayName: name.trim() });
+        }
+    }
     // 대기 중이던 작업(각 페이지의 데이터 구독)을 이제 실행
     if (!_authUser) {
         _authUser = user;
@@ -31,31 +39,60 @@ function isOwner(item) {
     return !!(item && auth.currentUser && item.ownerUid === auth.currentUser.uid);
 }
 
+// ✨ 오늘 날짜 (YYYY-MM-DD) - 하루 한 번 제한 체크용
+function todayKeyForMileage() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 // ✨ 마일리지 적립/차감 (현재 로그인한 계정 기준)
 // amount: 양수면 적립, 음수면 차감 / reason: 내역에 표시될 문구
-function awardMileage(amount, reason) {
+// type: 넘겨주면 "오늘 이 종류로는 이미 적립받았는지"를 확인해서, 하루에 한 번만 적립되게 함
+//       (게시글/댓글처럼 여러 번 반복해도 매번 적립되면 안 되는 활동에 사용.
+//        숙제 체크처럼 실제 항목 수만큼 정직하게 쌓여야 하면 type을 안 넘기면 됨)
+function awardMileage(amount, reason, type) {
     if (!auth.currentUser) return;
     const uid = auth.currentUser.uid;
     const name = currentUserName();
     const mileageRef = db.collection("mileage").doc(uid);
+    const todayKey = todayKeyForMileage();
 
-    db.runTransaction(function(tx) {
-        return tx.get(mileageRef).then(function(doc) {
-            const current = doc.exists ? (doc.data().total || 0) : 0;
-            const next = Math.max(0, current + amount);
-            tx.set(mileageRef, { name: name, total: next }, { merge: true });
+    function doAward() {
+        db.runTransaction(function(tx) {
+            return tx.get(mileageRef).then(function(doc) {
+                const current = doc.exists ? (doc.data().total || 0) : 0;
+                const next = Math.max(0, current + amount);
+                tx.set(mileageRef, { name: name, total: next }, { merge: true });
+            });
+        }).then(function() {
+            return db.collection("mileage_log").add({
+                uid: uid,
+                name: name,
+                amount: amount,
+                reason: reason,
+                type: type || null,
+                dateKey: todayKey,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }).catch(function(err) {
+            console.error("마일리지 적립 실패:", err.message);
         });
-    }).then(function() {
-        return db.collection("mileage_log").add({
-            uid: uid,
-            name: name,
-            amount: amount,
-            reason: reason,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }
+
+    if (!type) { doAward(); return; }
+
+    db.collection("mileage_log")
+        .where("uid", "==", uid)
+        .where("type", "==", type)
+        .where("dateKey", "==", todayKey)
+        .limit(1)
+        .get()
+        .then(function(snapshot) {
+            if (snapshot.empty) doAward();  // 오늘 이미 이 종류로 적립받았으면 조용히 건너뜀
+        })
+        .catch(function(err) {
+            console.error("마일리지 중복 확인 실패:", err.message);
         });
-    }).catch(function(err) {
-        console.error("마일리지 적립 실패:", err.message);
-    });
 }
 
 // ✨ 다크 모드 토글 (로컬 저장)

@@ -682,8 +682,8 @@ a { color: inherit; }
 .mileage-name { font-family: 'Noto Serif KR', serif; font-size: 15px; font-weight: 700; color: var(--text-main); }
 .mileage-total { font-size: 12.5px; font-weight: 700; color: var(--primary); }
 .mileage-krw { font-size: 11px; color: var(--text-muted); }
-.mileage-payout-btn { flex-shrink: 0; padding: 10px 18px; font-size: 12px; }
-.mileage-payout-btn:disabled { opacity: 0.4; cursor: default; }
+.mileage-cashout-btn { flex-shrink: 0; padding: 10px 18px; font-size: 12px; }
+.mileage-cashout-btn:disabled { opacity: 0.4; cursor: default; }
 .mileage-log-item {
     display: flex;
     align-items: center;
@@ -695,9 +695,16 @@ a { color: inherit; }
     padding: 12px 16px;
     margin-bottom: 8px;
 }
-.mileage-log-left { display: flex; flex-direction: column; gap: 2px; }
+/* min-width: 0 이 없으면 이름/사유 텍스트가 길 때 옆의 금액을 밀어내며 줄바꿈되어 지저분해 보임 */
+.mileage-log-left { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .mileage-log-name { font-size: 12.5px; font-weight: 700; color: var(--text-main); }
-.mileage-log-reason { font-size: 11px; color: var(--text-muted); }
+.mileage-log-reason {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;   /* 사유가 길면 "..." 으로 한 줄에 깔끔하게 자름 */
+}
 .mileage-log-amount { font-size: 13px; font-weight: 800; flex-shrink: 0; }
 .mileage-log-amount.positive { color: var(--primary); }
 .mileage-log-amount.negative { color: var(--blue); }

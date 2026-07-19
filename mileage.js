@@ -31,13 +31,13 @@ function renderMileageList() {
                     <span class="mileage-total">${total} 마일리지</span>
                     <span class="mileage-krw">약 ${krw.toLocaleString("ko-KR")}원</span>
                 </div>
-                <button class="btn-secondary mileage-payout-btn" data-uid="${m.id}" data-name="${escapeHtml(m.name)}" data-total="${total}" ${total > 0 ? "" : "disabled"}>지급하기</button>
+                <button class="btn-secondary mileage-cashout-btn" data-uid="${m.id}" data-name="${escapeHtml(m.name)}" data-total="${total}" ${total > 0 ? "" : "disabled"}>캐쉬전환</button>
             </div>
         `;
     }).join("");
-    listEl.querySelectorAll(".mileage-payout-btn").forEach(function(btn) {
+    listEl.querySelectorAll(".mileage-cashout-btn").forEach(function(btn) {
         btn.addEventListener("click", function() {
-            openPayoutModal(btn.dataset.uid, btn.dataset.name, Number(btn.dataset.total));
+            openCashoutModal(btn.dataset.uid, btn.dataset.name, Number(btn.dataset.total));
         });
     });
 }
@@ -62,40 +62,41 @@ function renderLogList() {
     }).join("");
 }
 
-// ✨ 지급 모달
-let payoutTarget = null;
-const payoutModal = document.getElementById("payout-modal");
+// ✨ 캐쉬전환 모달 (마일리지를 실제 현금으로 바꿨다고 기록 → 모두가 보는 내역에 남음)
+let cashoutTarget = null;
+const cashoutModal = document.getElementById("cashout-modal");
 
-function openPayoutModal(uid, name, total) {
-    payoutTarget = { uid: uid, name: name, total: total };
+function openCashoutModal(uid, name, total) {
+    cashoutTarget = { uid: uid, name: name, total: total };
     const krw = total * MILEAGE_RATE;
-    document.getElementById("payout-desc").textContent =
-        `${name}님의 ${total}마일리지(약 ${krw.toLocaleString("ko-KR")}원)를 실제로 지급하셨나요? 확인을 누르면 마일리지가 0으로 초기화돼요.`;
-    payoutModal.classList.add("open");
+    document.getElementById("cashout-desc").textContent =
+        `${name}님의 ${total}마일리지(약 ${krw.toLocaleString("ko-KR")}원)를 캐쉬로 전환할까요? 확인을 누르면 마일리지가 0으로 초기화되고, 전환 내역이 가족 모두에게 보여요.`;
+    cashoutModal.classList.add("open");
 }
-document.getElementById("payout-modal-close").addEventListener("click", function() { payoutModal.classList.remove("open"); });
-document.getElementById("payout-cancel-btn").addEventListener("click", function() { payoutModal.classList.remove("open"); });
-payoutModal.addEventListener("click", function(e) { if (e.target === payoutModal) payoutModal.classList.remove("open"); });
+document.getElementById("cashout-modal-close").addEventListener("click", function() { cashoutModal.classList.remove("open"); });
+document.getElementById("cashout-cancel-btn").addEventListener("click", function() { cashoutModal.classList.remove("open"); });
+cashoutModal.addEventListener("click", function(e) { if (e.target === cashoutModal) cashoutModal.classList.remove("open"); });
 
-document.getElementById("payout-confirm-btn").addEventListener("click", function() {
-    if (!payoutTarget) return;
-    const krw = payoutTarget.total * MILEAGE_RATE;
-    const btn = document.getElementById("payout-confirm-btn");
+document.getElementById("cashout-confirm-btn").addEventListener("click", function() {
+    if (!cashoutTarget) return;
+    const krw = cashoutTarget.total * MILEAGE_RATE;
+    const btn = document.getElementById("cashout-confirm-btn");
     btn.disabled = true;
 
-    db.collection("mileage").doc(payoutTarget.uid).set({ name: payoutTarget.name, total: 0 }, { merge: true })
+    db.collection("mileage").doc(cashoutTarget.uid).set({ name: cashoutTarget.name, total: 0 }, { merge: true })
         .then(function() {
+            // mileage_log에 남기는 이 기록을 가족 전원이 실시간으로 같이 보게 됨
             return db.collection("mileage_log").add({
-                uid: payoutTarget.uid,
-                name: payoutTarget.name,
-                amount: -payoutTarget.total,
-                reason: `지급 완료 (${krw.toLocaleString("ko-KR")}원)`,
+                uid: cashoutTarget.uid,
+                name: cashoutTarget.name,
+                amount: -cashoutTarget.total,
+                reason: `캐쉬전환 (${krw.toLocaleString("ko-KR")}원)`,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         })
         .then(function() {
-            showToast(`${payoutTarget.name}님에게 ${krw.toLocaleString("ko-KR")}원 지급 완료로 기록했어요.`);
-            payoutModal.classList.remove("open");
+            showToast(`${cashoutTarget.name}님이 ${krw.toLocaleString("ko-KR")}원으로 캐쉬전환했어요.`);
+            cashoutModal.classList.remove("open");
         })
         .catch(function(err) {
             showToast("처리에 실패했어요: " + err.message);
