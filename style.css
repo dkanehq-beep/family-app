@@ -47,7 +47,7 @@ body.dark-mode .fab:hover { background: var(--primary-dark); }
     -webkit-tap-highlight-color: transparent;
 }
 
-.serif, .login-card h1, .topbar-logo span, .page-title, .home-hero h1,
+.serif, .login-card h1, .topbar-logo span, .page-title,
 .dash-card h3, .cal-header h2, .post-detail h2, .modal-box h3, .drawer-header h4 {
     font-family: 'Noto Serif KR', serif;
     letter-spacing: -0.01em;
@@ -485,43 +485,6 @@ a { color: inherit; }
 }
 
 /* ===== 홈 대시보드 ===== */
-.home-hero {
-    text-align: center;
-    padding: 40px 28px 38px 28px;
-    margin-bottom: 28px;
-    border-radius: 24px;
-    background: linear-gradient(155deg, #3a231a 0%, #6b3a24 55%, var(--primary) 100%);
-    box-shadow: 0 20px 46px rgba(44, 24, 16, 0.25);
-    position: relative;
-    overflow: hidden;
-}
-.home-hero::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(circle at 85% 0%, rgba(255,255,255,0.14) 0%, transparent 50%);
-}
-.home-hero-date {
-    position: relative;
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    color: var(--accent);
-    margin-bottom: 12px;
-}
-.home-hero h1 {
-    position: relative;
-    font-size: 23px;
-    font-weight: 700;
-    color: #fdf8f2;
-}
-.home-hero p {
-    position: relative;
-    font-size: 13.5px;
-    color: rgba(253, 248, 242, 0.75);
-    font-weight: 300;
-    margin-top: 10px;
-}
 
 /* ✨ 공지사항 */
 .announce-section { margin-top: 26px; }
@@ -1532,8 +1495,7 @@ body.dark-mode .cal-holiday-name { color: #f0846b; }
 }
 
 /* ✨ 페이지 헤더 배너 장식 - 우상단에서 퍼지는 동심원 링 */
-.page-header-band::after,
-.home-hero::after {
+.page-header-band::after {
     content: '';
     position: absolute;
     right: -28px;

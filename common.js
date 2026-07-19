@@ -14,23 +14,12 @@ auth.onAuthStateChanged(function(user) {
         window.location.href = "index.html";
         return;
     }
-    const heroDateEl = document.getElementById("home-hero-date");
-    if (heroDateEl) {
-        heroDateEl.textContent = formatTodayLong();
-    }
     // 대기 중이던 작업(각 페이지의 데이터 구독)을 이제 실행
     if (!_authUser) {
         _authUser = user;
         _authReadyCallbacks.splice(0).forEach(function(cb) { cb(user); });
     }
 });
-
-// ✨ 오늘 날짜를 "2026년 7월 18일 토요일" 형식으로
-function formatTodayLong() {
-    const d = new Date();
-    const weekday = ["일", "월", "화", "수", "목", "금", "토"][d.getDay()];
-    return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${weekday}요일`;
-}
 
 // ✨ 현재 로그인한 사람 이름 (없으면 "가족"으로 표시)
 function currentUserName() {
