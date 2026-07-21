@@ -1598,3 +1598,113 @@ body.dark-mode .cal-holiday-name { color: #f0846b; }
                 0 0 0 74px rgba(253, 248, 242, 0.03);
     pointer-events: none;
 }
+
+/* ✨ 오늘의 질문 (체크인) */
+.checkin-streak {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+}
+.checkin-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+}
+.checkin-question { font-size: 14.5px; font-weight: 700; color: var(--text-main); margin-bottom: 14px; }
+.checkin-form { display: flex; gap: 8px; }
+.checkin-form input {
+    flex: 1;
+    min-width: 0;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    font-size: 12.5px;
+    background: var(--bg-main);
+    color: var(--text-main);
+    outline: none;
+}
+.checkin-form input:focus { border-color: var(--primary); }
+.checkin-form .btn-primary { flex-shrink: 0; padding: 0 18px; }
+.checkin-done-note { font-size: 12px; color: var(--primary); font-weight: 700; }
+.checkin-answers { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.checkin-answer { background: var(--bg-main); border-radius: 10px; padding: 10px 14px; }
+.checkin-answer-name { font-size: 11.5px; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 3px; }
+.checkin-answer p { font-size: 12.5px; color: var(--text-muted); }
+
+/* ✨ 오늘의 축하 (캘린더 일정 메시지 벽) */
+.event-wish-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-accent);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 10px;
+}
+.event-wish-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; }
+.event-wish-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.event-wish-form { display: flex; gap: 8px; }
+.event-wish-form input {
+    flex: 1;
+    min-width: 0;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    font-size: 12.5px;
+    background: var(--bg-main);
+    color: var(--text-main);
+    outline: none;
+}
+.event-wish-form input:focus { border-color: var(--primary); }
+.event-wish-form .btn-primary { flex-shrink: 0; padding: 0 18px; }
+
+/* ✨ 댓글 이모지 반응 - 게시글 반응(.reaction-btn)보다 한 단계 작은 버전 */
+.comment-reaction-bar { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.comment-reaction-btn {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border-light);
+    border-radius: 99px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, background 0.2s;
+}
+.comment-reaction-btn .reaction-emoji { font-size: 12px; }
+.comment-reaction-btn .reaction-count { font-size: 10px; font-weight: 700; color: var(--text-muted); }
+.comment-reaction-btn.mine { border-color: var(--primary); background: var(--primary-light); }
+.comment-reaction-btn.mine .reaction-count { color: var(--primary); }
+.comment-reaction-btn:active { transform: scale(0.88); }
+
+/* ✨ 아바타 이모지 프로필 */
+.avatar-edit-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 10.5px;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-left: 6px;
+}
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+.avatar-choice-btn {
+    background: var(--bg-main);
+    border: 1.5px solid var(--border-light);
+    border-radius: 14px;
+    font-size: 24px;
+    padding: 12px 0;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+}
+.avatar-choice-btn:hover { border-color: var(--border-accent); }
+.avatar-choice-btn.selected { border-color: var(--primary); background: var(--primary-light); }
+.avatar-choice-btn:active { transform: scale(0.9); }

@@ -10,6 +10,186 @@ function formatAnnounceDate(ts) {
     return `${d.getMonth() + 1}월 ${d.getDate()}일`;
 }
 
+// ✨ 오늘의 질문 (체크인) - 답하면 마일리지 2점 + 가족 연속 체크인 스트릭 유지
+const DAILY_QUESTIONS = [
+    "오늘 가장 고마웠던 순간은?", "오늘 먹은 것 중에 제일 맛있었던 건?",
+    "오늘 기분을 색깔로 표현한다면?", "요즘 제일 하고 싶은 일은?",
+    "오늘 가족 중 누구에게 고마웠나요?", "최근에 웃겼던 일이 있다면?",
+    "오늘 하루를 한 단어로 표현한다면?", "요즘 제일 좋아하는 노래나 음식은?",
+    "오늘 있었던 일 중 기억에 남는 건?", "지금 가장 기대되는 일은?",
+    "오늘 날씨는 어땠나요, 기분은요?", "요즘 배우고 싶은 게 있다면?",
+    "오늘 누군가를 도와준 일이 있나요?", "우리 가족과 하고 싶은 게 있다면?",
+    "오늘 스스로를 칭찬한다면?"
+];
+function dayOfYear(d) {
+    const start = new Date(d.getFullYear(), 0, 0);
+    return Math.floor((d - start) / 86400000);
+}
+function todaysQuestion() { return DAILY_QUESTIONS[dayOfYear(new Date()) % DAILY_QUESTIONS.length]; }
+
+let todayCheckins = [];
+let checkinStreak = 0;
+
+function myTodayCheckin() {
+    const uid = auth.currentUser && auth.currentUser.uid;
+    return todayCheckins.find(function(c) { return c.ownerUid === uid; });
+}
+
+function renderCheckinWidget() {
+    const widget = document.getElementById("checkin-widget");
+    if (!widget) return;
+    const mine = myTodayCheckin();
+    const question = todaysQuestion();
+
+    const answersHtml = todayCheckins.length > 0
+        ? todayCheckins.map(function(c) {
+            return `<div class="checkin-answer"><span class="checkin-answer-name">${avatarPrefix(c.ownerUid)}${escapeHtml(c.name)}</span><p>${escapeHtml(c.answer)}</p></div>`;
+        }).join("")
+        : '<p class="empty-hint">아직 아무도 답하지 않았어요. 첫 번째로 답해보세요!</p>';
+
+    widget.innerHTML = `
+        <p class="checkin-question">${escapeHtml(question)}</p>
+        ${mine
+            ? `<p class="checkin-done-note">오늘 답변 완료 ✓</p>`
+            : `<form id="checkin-form" class="checkin-form">
+                <input type="text" id="checkin-answer" placeholder="짧게 답해보세요" required maxlength="80">
+                <button type="submit" class="btn-primary">답하기</button>
+            </form>`}
+        <div class="checkin-answers">${answersHtml}</div>
+    `;
+
+    const form = document.getElementById("checkin-form");
+    if (form) {
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const answer = document.getElementById("checkin-answer").value.trim();
+            const uid = auth.currentUser.uid;
+            const dateKey = todayDateKey();
+            db.collection("checkins").doc(`${uid}_${dateKey}`).set({
+                ownerUid: uid,
+                name: currentUserName(),
+                question: question,
+                answer: answer,
+                dateKey: dateKey,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(function() {
+                showToast("체크인 완료! 🔥");
+                awardMileage(2, "오늘의 질문 체크인", "checkin");
+            }).catch(function(err) {
+                showToast("체크인에 실패했어요: " + err.message);
+            });
+        });
+    }
+}
+
+// 오늘까지(또는 어제까지) 하루도 안 빠지고 누군가 체크인한 날이 며칠 연속인지 계산
+function computeStreak(recentDateKeys) {
+    const set = new Set(recentDateKeys);
+    let streak = 0;
+    const cursor = new Date();
+    if (!set.has(formatDateKey(cursor))) {
+        cursor.setDate(cursor.getDate() - 1);  // 오늘 아직 아무도 체크인 안 했으면 어제부터 계산
+    }
+    while (set.has(formatDateKey(cursor))) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+    }
+    return streak;
+}
+
+function renderStreak() {
+    const el = document.getElementById("checkin-streak");
+    if (!el) return;
+    el.textContent = checkinStreak > 0 ? `🔥 연속 ${checkinStreak}일째` : "";
+}
+
+renderCheckinWidget();
+renderStreak();
+whenAuthReady(function() {
+    db.collection("checkins").where("dateKey", "==", todayDateKey()).onSnapshot(function(snapshot) {
+        todayCheckins = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderCheckinWidget();
+    });
+    db.collection("checkins").orderBy("dateKey", "desc").limit(200).onSnapshot(function(snapshot) {
+        checkinStreak = computeStreak(snapshot.docs.map(function(doc) { return doc.data().dateKey; }));
+        renderStreak();
+    });
+});
+
+// ✨ 오늘 캘린더 일정(생일 등)이 있으면 축하 메시지 남기는 공간을 보여줌
+function eventCoversDate(ev, key) {
+    const end = ev.endDate || ev.date;
+    return key >= ev.date && key <= end;
+}
+
+let allEventsForWish = [];
+let todayEvents = [];
+let todayEventWishes = [];
+
+function renderEventWishes() {
+    const wrap = document.getElementById("event-wish-section");
+    if (!wrap) return;
+    if (todayEvents.length === 0) {
+        wrap.style.display = "none";
+        wrap.innerHTML = "";
+        return;
+    }
+    wrap.style.display = "block";
+    wrap.innerHTML = `
+        <div class="section-header"><h3 class="section-label">오늘의 축하</h3></div>
+        ${todayEvents.map(function(ev) {
+            const wishes = todayEventWishes.filter(function(w) { return w.eventId === ev.id; });
+            const wishesHtml = wishes.length > 0
+                ? wishes.map(function(w) {
+                    return `<div class="wish-item"><span class="wish-item-title">${avatarPrefix(w.ownerUid)}${escapeHtml(w.author)}</span><p>${escapeHtml(w.text)}</p></div>`;
+                }).join("")
+                : '<p class="empty-hint">아직 메시지가 없어요. 첫 축하를 남겨보세요!</p>';
+            return `
+                <div class="event-wish-card">
+                    <p class="event-wish-title">🎉 오늘은 <b>${escapeHtml(ev.title)}</b></p>
+                    <div class="event-wish-list">${wishesHtml}</div>
+                    <form class="event-wish-form" data-event-id="${ev.id}">
+                        <input type="text" class="event-wish-input" placeholder="축하 메시지를 남겨보세요" required maxlength="80">
+                        <button type="submit" class="btn-primary">남기기</button>
+                    </form>
+                </div>
+            `;
+        }).join("")}
+    `;
+
+    wrap.querySelectorAll(".event-wish-form").forEach(function(form) {
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const input = form.querySelector(".event-wish-input");
+            const text = input.value.trim();
+            db.collection("event_wishes").add({
+                eventId: form.dataset.eventId,
+                text: text,
+                author: currentUserName(),
+                ownerUid: auth.currentUser.uid,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(function() {
+                input.value = "";
+                showToast("메시지를 남겼어요 🎉");
+            }).catch(function(err) {
+                showToast("등록에 실패했어요: " + err.message);
+            });
+        });
+    });
+}
+
+whenAuthReady(function() {
+    db.collection("events").onSnapshot(function(snapshot) {
+        allEventsForWish = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        todayEvents = allEventsForWish.filter(function(ev) { return eventCoversDate(ev, todayDateKey()); });
+        renderEventWishes();
+    });
+    db.collection("event_wishes").orderBy("createdAt").onSnapshot(function(snapshot) {
+        todayEventWishes = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderEventWishes();
+    });
+});
+
 let allAnnouncements = [];
 let announceExpanded = false;
 
@@ -29,7 +209,7 @@ function renderAnnouncements() {
             <div class="announce-card">
                 <div class="announce-card-top">
                     <span class="announce-title">${escapeHtml(a.title)}</span>
-                    <span class="announce-meta">${escapeHtml(a.author)} · ${formatAnnounceDate(a.createdAt)}</span>
+                    <span class="announce-meta">${avatarPrefix(a.ownerUid)}${escapeHtml(a.author)} · ${formatAnnounceDate(a.createdAt)}</span>
                 </div>
                 <p class="announce-content">${escapeHtml(a.content)}</p>
                 ${isOwner(a) ? `<button class="announce-del" data-id="${a.id}">삭제</button>` : ""}
@@ -180,7 +360,7 @@ function renderPollWidget() {
         <div class="poll-card">
             <p class="poll-question">${escapeHtml(currentPoll.question)}</p>
             <div class="poll-options">${optionsHtml}</div>
-            <p class="poll-meta">${escapeHtml(currentPoll.author || "")} · 총 ${totalVotes}표</p>
+            <p class="poll-meta">${avatarPrefix(currentPoll.ownerUid)}${escapeHtml(currentPoll.author || "")} · 총 ${totalVotes}표</p>
         </div>
     `;
 
@@ -311,4 +491,12 @@ whenAuthReady(function() {
         });
         renderAnnouncements();
     });
+});
+
+// ✨ 누군가 아바타를 바꾸면 이름 옆 이모지도 바로 갱신
+document.addEventListener("avatars-updated", function() {
+    renderAnnouncements();
+    renderPollWidget();
+    renderCheckinWidget();
+    renderEventWishes();
 });

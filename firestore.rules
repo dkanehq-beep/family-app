@@ -18,7 +18,9 @@ service cloud.firestore {
       match /comments/{commentId} {
         allow read: if isSignedIn();
         allow create: if isSignedIn();
-        allow update, delete: if isOwner(resource.data);
+        // update은 누구나(댓글에 이모지 반응 달 때 필요), 삭제는 작성자만
+        allow update: if isSignedIn();
+        allow delete: if isOwner(resource.data);
       }
 
       // 이모지 반응 - 문서 id 자체가 본인 uid라서, 본인 문서만 쓸 수 있게 제한
@@ -96,6 +98,28 @@ service cloud.firestore {
         allow read: if isSignedIn();
         allow write: if isSignedIn() && request.auth.uid == voterUid;
       }
+    }
+
+    // 오늘의 질문 체크인 (문서 id가 "본인uid_날짜"라서 본인 것만 쓸 수 있게 제한)
+    match /checkins/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // 캘린더 일정(생일 등)에 남기는 축하 메시지
+    match /event_wishes/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn();
+      allow delete: if isOwner(resource.data);
+    }
+
+    // 프로필(아바타 이모지) - 문서 id가 본인 uid라서 본인 것만 쓸 수 있음
+    match /profiles/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == uid;
     }
 
     // 그 외 컬렉션은 기본 차단

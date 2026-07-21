@@ -39,6 +39,26 @@ function isOwner(item) {
     return !!(item && auth.currentUser && item.ownerUid === auth.currentUser.uid);
 }
 
+// ✨ 프로필 이모지 아바타 (모든 페이지에서 공통으로 구독, uid로 조회)
+// 이름 옆에 아바타를 붙이고 싶은 곳에서는 avatarPrefix(uid)를 이름 앞에 붙이면 됨
+let _profileAvatars = {};  // { uid: "🦊" } 형태
+const AVATAR_CHOICES = ["🦊", "🐻", "🐰", "🐱", "🐶", "🐼", "🦁", "🐯", "🐨", "🐷", "🐮", "🐸", "🦄", "🐙", "🌟", "🌈"];
+
+function avatarPrefix(uid) {
+    const emoji = uid && _profileAvatars[uid];
+    return emoji ? emoji + " " : "";
+}
+
+whenAuthReady(function() {
+    db.collection("profiles").onSnapshot(function(snapshot) {
+        const next = {};
+        snapshot.docs.forEach(function(doc) { next[doc.id] = (doc.data().avatar || ""); });
+        _profileAvatars = next;
+        // 아바타가 바뀌면 화면에 다시 그려야 하는 페이지들이 각자 반영할 수 있도록 신호를 보냄
+        document.dispatchEvent(new CustomEvent("avatars-updated"));
+    });
+});
+
 // ✨ 오늘 날짜 (YYYY-MM-DD) - 하루 한 번 제한 체크용
 function todayKeyForMileage() {
     const d = new Date();

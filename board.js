@@ -27,7 +27,7 @@ function renderBoardList() {
         return `
             <div class="board-item" data-id="${post.id}">
                 <h4>${escapeHtml(post.title)}</h4>
-                <div class="meta">${escapeHtml(post.author)} · ${formatDateTime(post.createdAt)}</div>
+                <div class="meta">${avatarPrefix(post.ownerUid)}${escapeHtml(post.author)} · ${formatDateTime(post.createdAt)}</div>
                 <div class="preview">${escapeHtml((post.content || "").slice(0, 60))}${(post.content || "").length > 60 ? "..." : ""}</div>
             </div>
         `;
@@ -44,7 +44,7 @@ function openPostDetail(id) {
     currentPostId = id;
 
     document.getElementById("detail-post-title").textContent = post.title;
-    document.getElementById("detail-post-meta").textContent = `${post.author} · ${formatDateTime(post.createdAt)}`;
+    document.getElementById("detail-post-meta").textContent = `${avatarPrefix(post.ownerUid)}${post.author} · ${formatDateTime(post.createdAt)}`;
     document.getElementById("detail-post-content").textContent = post.content;
     document.getElementById("delete-post-btn").style.display = isOwner(post) ? "block" : "none";
 
@@ -56,20 +56,50 @@ function openPostDetail(id) {
     commentUnsub = db.collection("posts").doc(id).collection("comments")
         .orderBy("createdAt")
         .onSnapshot(function(snapshot) {
-            const comments = snapshot.docs.map(function(doc) { return doc.data(); });
+            const comments = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
             const listEl = document.getElementById("comment-list");
             if (comments.length === 0) {
                 listEl.innerHTML = "";
                 return;
             }
+            const myUid = auth.currentUser && auth.currentUser.uid;
             listEl.innerHTML = comments.map(function(c) {
+                const reactions = c.reactions || {};
+                const myReaction = reactions[myUid];
+                const reactionButtons = REACTION_EMOJIS.map(function(emoji) {
+                    const count = Object.keys(reactions).filter(function(uid) { return reactions[uid] === emoji; }).length;
+                    const isMine = myReaction === emoji;
+                    return `
+                        <button type="button" class="comment-reaction-btn${isMine ? " mine" : ""}" data-comment-id="${c.id}" data-emoji="${emoji}">
+                            <span class="reaction-emoji">${emoji}</span>${count > 0 ? `<span class="reaction-count">${count}</span>` : ""}
+                        </button>
+                    `;
+                }).join("");
                 return `
                     <div class="comment-item">
-                        <div class="meta">${escapeHtml(c.author)} · ${formatDateTime(c.createdAt)}</div>
+                        <div class="meta">${avatarPrefix(c.ownerUid)}${escapeHtml(c.author)} · ${formatDateTime(c.createdAt)}</div>
                         <p>${escapeHtml(c.text)}</p>
+                        <div class="comment-reaction-bar">${reactionButtons}</div>
                     </div>
                 `;
             }).join("");
+
+            listEl.querySelectorAll(".comment-reaction-btn").forEach(function(btn) {
+                btn.addEventListener("click", function() {
+                    if (!myUid || !currentPostId) return;
+                    const commentId = btn.dataset.commentId;
+                    const emoji = btn.dataset.emoji;
+                    const comment = comments.find(function(c) { return c.id === commentId; });
+                    const current = comment && comment.reactions && comment.reactions[myUid];
+                    const commentRef = db.collection("posts").doc(currentPostId).collection("comments").doc(commentId);
+                    const fieldPath = "reactions." + myUid;
+                    if (current === emoji) {
+                        commentRef.update({ [fieldPath]: firebase.firestore.FieldValue.delete() });
+                    } else {
+                        commentRef.update({ [fieldPath]: emoji });
+                    }
+                });
+            });
         });
 
     if (reactionUnsub) reactionUnsub();
@@ -189,3 +219,6 @@ whenAuthReady(function() {
         renderBoardList();
     });
 });
+
+// ✨ 누군가 아바타를 바꾸면 목록의 이름 옆 이모지도 바로 갱신
+document.addEventListener("avatars-updated", renderBoardList);

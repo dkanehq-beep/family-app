@@ -23,16 +23,18 @@ function renderMileageList() {
     }
     // 순위 배지 (1~3위는 메달, 그 아래는 숫자) - 마일리지가 0이면 순위를 매기지 않음
     const MEDALS = { 1: "🥇", 2: "🥈", 3: "🥉" };
+    const myUid = auth.currentUser && auth.currentUser.uid;
     listEl.innerHTML = allMileage.map(function(m, index) {
         const total = m.total || 0;
         const krw = total * MILEAGE_RATE;
         const rank = index + 1;
         const rankLabel = total > 0 ? (MEDALS[rank] || `${rank}위`) : "";
+        const isMine = m.id === myUid;
         return `
             <div class="mileage-card${rank === 1 && total > 0 ? " rank-1" : ""}">
                 ${rankLabel ? `<span class="mileage-rank${MEDALS[rank] ? " medal" : ""}">${rankLabel}</span>` : ""}
                 <div class="mileage-card-info">
-                    <span class="mileage-name">${escapeHtml(m.name)}</span>
+                    <span class="mileage-name">${avatarPrefix(m.id)}${escapeHtml(m.name)}${isMine ? '<button type="button" class="avatar-edit-btn" id="avatar-edit-btn">아바타 변경</button>' : ""}</span>
                     <span class="mileage-total">${total} 마일리지</span>
                     <span class="mileage-krw">약 ${krw.toLocaleString("ko-KR")}원</span>
                 </div>
@@ -45,7 +47,33 @@ function renderMileageList() {
             openCashoutModal(btn.dataset.uid, btn.dataset.name, Number(btn.dataset.total));
         });
     });
+    const avatarBtn = document.getElementById("avatar-edit-btn");
+    if (avatarBtn) avatarBtn.addEventListener("click", openAvatarModal);
 }
+
+// ✨ 아바타(이모지 프로필) 고르기 - 본인 카드에서만 보임
+const avatarModal = document.getElementById("avatar-modal");
+
+function openAvatarModal() {
+    const grid = document.getElementById("avatar-grid");
+    const myUid = auth.currentUser.uid;
+    const current = _profileAvatars[myUid] || "";
+    grid.innerHTML = AVATAR_CHOICES.map(function(emoji) {
+        return `<button type="button" class="avatar-choice-btn${emoji === current ? " selected" : ""}" data-emoji="${emoji}">${emoji}</button>`;
+    }).join("");
+    grid.querySelectorAll(".avatar-choice-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            db.collection("profiles").doc(myUid).set({ avatar: btn.dataset.emoji }, { merge: true })
+                .then(function() {
+                    showToast("아바타를 바꿨어요");
+                    avatarModal.classList.remove("open");
+                });
+        });
+    });
+    avatarModal.classList.add("open");
+}
+document.getElementById("avatar-modal-close").addEventListener("click", function() { avatarModal.classList.remove("open"); });
+avatarModal.addEventListener("click", function(e) { if (e.target === avatarModal) avatarModal.classList.remove("open"); });
 
 function renderLogList() {
     const listEl = document.getElementById("mileage-log-list");
@@ -58,7 +86,7 @@ function renderLogList() {
         return `
             <div class="mileage-log-item">
                 <div class="mileage-log-left">
-                    <span class="mileage-log-name">${escapeHtml(log.name)}</span>
+                    <span class="mileage-log-name">${avatarPrefix(log.uid)}${escapeHtml(log.name)}</span>
                     <span class="mileage-log-reason">${escapeHtml(log.reason)} · ${formatLogDate(log.createdAt)}</span>
                 </div>
                 <span class="mileage-log-amount ${isPositive ? "positive" : "negative"}">${isPositive ? "+" : ""}${log.amount}</span>
@@ -126,4 +154,10 @@ whenAuthReady(function() {
         allLogs = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderLogList();
     });
+});
+
+// ✨ 누군가 아바타를 바꾸면 이름 옆 이모지도 바로 갱신
+document.addEventListener("avatars-updated", function() {
+    renderMileageList();
+    renderLogList();
 });
