@@ -183,10 +183,106 @@ whenAuthReady(function() {
         allEventsForWish = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         todayEvents = allEventsForWish.filter(function(ev) { return eventCoversDate(ev, todayDateKey()); });
         renderEventWishes();
+
+        // 다가오는 일정 중 가장 가까운 것 하나를 홈 대시보드 카드에 보여줌
+        const todayKey = todayDateKey();
+        const upcoming = allEventsForWish
+            .filter(function(ev) { return (ev.endDate || ev.date) >= todayKey; })
+            .sort(function(a, b) { return a.date.localeCompare(b.date); });
+        if (upcoming.length > 0) {
+            const diff = daysUntilDate(upcoming[0].date);
+            glanceUpcomingEvent = { title: upcoming[0].title, dday: diff === 0 ? "오늘" : `D-${diff}` };
+        } else {
+            glanceUpcomingEvent = null;
+        }
+        renderGlanceGrid();
     });
     db.collection("event_wishes").orderBy("createdAt").onSnapshot(function(snapshot) {
         todayEventWishes = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderEventWishes();
+    });
+});
+
+// ✨ 홈 대시보드 - 마일리지 1위 / 다가오는 일정 / 게시판 최신글을 한눈에 모아 보여줌
+function daysUntilDate(dateStr) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(dateStr + "T00:00:00");
+    return Math.round((target - today) / 86400000);
+}
+
+let glanceProfiles = [];
+let glanceMileageTotals = {};
+let glanceMileageTop = null;
+let glanceUpcomingEvent = null;
+let glanceLatestPost = null;
+
+function computeMileageTop() {
+    const merged = glanceProfiles
+        .map(function(p) { return { id: p.id, name: p.name || "가족", total: glanceMileageTotals[p.id] || 0 }; })
+        .sort(function(a, b) { return b.total - a.total; });
+    glanceMileageTop = (merged.length > 0 && merged[0].total > 0) ? merged[0] : null;
+}
+
+function renderGlanceGrid() {
+    const grid = document.getElementById("glance-grid");
+    if (!grid) return;
+
+    const mileageCard = glanceMileageTop
+        ? `<a class="glance-card" href="mileage.html">
+             <span class="glance-card-label">마일리지 1위</span>
+             <span class="glance-card-main">🥇 ${avatarPrefix(glanceMileageTop.id)}${escapeHtml(glanceMileageTop.name)}</span>
+             <span class="glance-card-sub">${glanceMileageTop.total} 마일리지</span>
+           </a>`
+        : `<a class="glance-card empty" href="mileage.html">
+             <span class="glance-card-label">마일리지</span>
+             <span class="glance-card-main">아직 순위가 없어요</span>
+             <span class="glance-card-sub">숙제나 글쓰기로 시작해보세요</span>
+           </a>`;
+
+    const eventCard = glanceUpcomingEvent
+        ? `<a class="glance-card" href="calendar.html">
+             <span class="glance-card-label">다가오는 일정</span>
+             <span class="glance-card-main">${escapeHtml(glanceUpcomingEvent.title)}</span>
+             <span class="glance-card-sub">${glanceUpcomingEvent.dday}</span>
+           </a>`
+        : `<a class="glance-card empty" href="calendar.html">
+             <span class="glance-card-label">다가오는 일정</span>
+             <span class="glance-card-main">예정된 일정이 없어요</span>
+             <span class="glance-card-sub">캘린더에 등록해보세요</span>
+           </a>`;
+
+    const postCard = glanceLatestPost
+        ? `<a class="glance-card" href="board.html">
+             <span class="glance-card-label">게시판 최신글</span>
+             <span class="glance-card-main">${escapeHtml(glanceLatestPost.title)}</span>
+             <span class="glance-card-sub">${avatarPrefix(glanceLatestPost.ownerUid)}${escapeHtml(glanceLatestPost.author)}</span>
+           </a>`
+        : `<a class="glance-card empty" href="board.html">
+             <span class="glance-card-label">게시판</span>
+             <span class="glance-card-main">아직 글이 없어요</span>
+             <span class="glance-card-sub">첫 소식을 남겨보세요</span>
+           </a>`;
+
+    grid.innerHTML = mileageCard + eventCard + postCard;
+}
+
+renderGlanceGrid();
+whenAuthReady(function() {
+    db.collection("profiles").onSnapshot(function(snapshot) {
+        glanceProfiles = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        computeMileageTop();
+        renderGlanceGrid();
+    });
+    db.collection("mileage").onSnapshot(function(snapshot) {
+        glanceMileageTotals = {};
+        snapshot.docs.forEach(function(doc) { glanceMileageTotals[doc.id] = doc.data().total || 0; });
+        computeMileageTop();
+        renderGlanceGrid();
+    });
+    db.collection("posts").orderBy("createdAt", "desc").limit(1).onSnapshot(function(snapshot) {
+        glanceLatestPost = snapshot.empty ? null : Object.assign({ id: snapshot.docs[0].id }, snapshot.docs[0].data());
+        renderGlanceGrid();
     });
 });
 
@@ -499,6 +595,7 @@ document.addEventListener("avatars-updated", function() {
     renderPollWidget();
     renderCheckinWidget();
     renderEventWishes();
+    renderGlanceGrid();
 });
 
 // ✨ 홈 화면을 열어봤으니 지금까지의 공지는 다 본 것으로 처리 (탭바 배지 해제용)
