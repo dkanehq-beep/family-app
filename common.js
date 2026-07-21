@@ -115,6 +115,37 @@ function awardMileage(amount, reason, type) {
         });
 }
 
+// ✨ 오늘의 질문에 새 답변이 올라오면, 지금 어느 페이지에 있든 토스트로 알려줌
+// (푸시 알림이 아니라 앱을 켜놓고 있을 때만 실시간으로 뜨는 방식)
+whenAuthReady(function() {
+    const todayKey = todayKeyForMileage();
+    let firstLoad = true;
+    db.collection("checkins").where("dateKey", "==", todayKey).onSnapshot(function(snapshot) {
+        snapshot.docChanges().forEach(function(change) {
+            if (firstLoad || change.type !== "added") return;  // 처음 불러올 때 이미 있던 답변은 알리지 않음
+            const data = change.doc.data();
+            if (data.ownerUid === auth.currentUser.uid) return;  // 본인 답변은 알리지 않음
+            showToast(`${avatarPrefix(data.ownerUid)}${data.name}님이 오늘의 질문에 답했어요 💬`);
+        });
+        firstLoad = false;
+    });
+});
+
+// ✨ 안 읽은 공지 배지 (탭바/상단 메뉴의 "홈"에 빨간 점)
+// 마지막으로 홈 화면을 본 시각(기기에 저장)보다 최신 공지가 있으면 배지를 켬
+whenAuthReady(function() {
+    db.collection("announcements").orderBy("createdAt", "desc").limit(1).onSnapshot(function(snapshot) {
+        if (snapshot.empty) return;
+        const latest = snapshot.docs[0].data().createdAt;
+        if (!latest || !latest.toMillis) return;
+        const lastSeen = Number(localStorage.getItem("lastSeenAnnounceMs") || 0);
+        const hasUnread = latest.toMillis() > lastSeen;
+        document.querySelectorAll('.tabbar a[href="home.html"], .topbar-nav a[href="home.html"]').forEach(function(link) {
+            link.classList.toggle("has-badge", hasUnread);
+        });
+    });
+});
+
 // ✨ 다크 모드 토글 (로컬 저장)
 const MOON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg>';
 const SUN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/></svg>';

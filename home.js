@@ -500,3 +500,14 @@ document.addEventListener("avatars-updated", function() {
     renderCheckinWidget();
     renderEventWishes();
 });
+
+// ✨ 홈 화면을 열어봤으니 지금까지의 공지는 다 본 것으로 처리 (탭바 배지 해제용)
+whenAuthReady(function() {
+    db.collection("announcements").orderBy("createdAt", "desc").limit(1).get().then(function(snapshot) {
+        if (snapshot.empty) return;
+        const latest = snapshot.docs[0].data().createdAt;
+        if (latest && latest.toMillis) {
+            localStorage.setItem("lastSeenAnnounceMs", String(latest.toMillis()));
+        }
+    });
+});
