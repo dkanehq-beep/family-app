@@ -9,6 +9,11 @@ function whenAuthReady(cb) {
     _authReadyCallbacks.push(cb);              // 아니면 대기줄에 등록
 }
 
+// 로그인한 본인을 profiles에 기록/갱신 - 마일리지 랭킹에서 "가입한 가족 전체 명단"으로 재사용
+function syncMyProfile(user) {
+    db.collection("profiles").doc(user.uid).set({ name: user.displayName || "가족" }, { merge: true });
+}
+
 auth.onAuthStateChanged(function(user) {
     if (!user) {
         window.location.href = "index.html";
@@ -19,8 +24,12 @@ auth.onAuthStateChanged(function(user) {
     if (!user.displayName) {
         const name = window.prompt("이름을 등록해 주세요 (마일리지 등에 표시돼요)", "");
         if (name && name.trim()) {
-            user.updateProfile({ displayName: name.trim() });
+            user.updateProfile({ displayName: name.trim() }).then(function() { syncMyProfile(user); });
+        } else {
+            syncMyProfile(user);
         }
+    } else {
+        syncMyProfile(user);
     }
     // 대기 중이던 작업(각 페이지의 데이터 구독)을 이제 실행
     if (!_authUser) {

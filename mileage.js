@@ -12,13 +12,26 @@ function formatLogDate(ts) {
     return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-let allMileage = [];
+let allProfiles = [];     // 가입한 가족 전체 명단 (로그인할 때마다 자동 기록됨)
+let allMileageTotals = {}; // uid -> { name, total }
 let allLogs = [];
+
+// 명단(profiles) + 마일리지 총합을 합쳐서, 마일리지가 0이라 아직 mileage 문서가 없는
+// 사람도 랭킹에 같이 뜨게 함
+function mergedMileageList() {
+    return allProfiles
+        .map(function(p) {
+            const m = allMileageTotals[p.id];
+            return { id: p.id, name: (m && m.name) || p.name || "가족", total: (m && m.total) || 0 };
+        })
+        .sort(function(a, b) { return b.total - a.total; });
+}
 
 function renderMileageList() {
     const listEl = document.getElementById("mileage-list");
+    const allMileage = mergedMileageList();
     if (allMileage.length === 0) {
-        listEl.innerHTML = '<p class="empty-hint">아직 적립된 마일리지가 없어요. 숙제를 체크하거나 게시글을 써보세요!</p>';
+        listEl.innerHTML = '<p class="empty-hint">아직 가입한 가족이 없어요.</p>';
         return;
     }
     // 순위 배지 (1~3위는 메달, 그 아래는 숫자) - 마일리지가 0이면 순위를 매기지 않음
@@ -143,10 +156,14 @@ document.getElementById("cashout-confirm-btn").addEventListener("click", functio
 renderMileageList();
 renderLogList();
 whenAuthReady(function() {
+    db.collection("profiles").onSnapshot(function(snapshot) {
+        allProfiles = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderMileageList();
+    });
+
     db.collection("mileage").onSnapshot(function(snapshot) {
-        allMileage = snapshot.docs
-            .map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); })
-            .sort(function(a, b) { return (b.total || 0) - (a.total || 0); });
+        allMileageTotals = {};
+        snapshot.docs.forEach(function(doc) { allMileageTotals[doc.id] = doc.data(); });
         renderMileageList();
     });
 
