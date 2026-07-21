@@ -20,6 +20,12 @@ service cloud.firestore {
         allow create: if isSignedIn();
         allow update, delete: if isOwner(resource.data);
       }
+
+      // 이모지 반응 - 문서 id 자체가 본인 uid라서, 본인 문서만 쓸 수 있게 제한
+      match /reactions/{uid} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn() && request.auth.uid == uid;
+      }
     }
 
     // 캘린더 일정

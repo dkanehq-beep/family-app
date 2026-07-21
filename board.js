@@ -1,6 +1,8 @@
 let allPosts = [];
 let currentPostId = null;
 let commentUnsub = null;
+let reactionUnsub = null;
+const REACTION_EMOJIS = ["❤️", "👍", "😂", "😮", "😢"];
 
 function escapeHtml(str) {
     const div = document.createElement("div");
@@ -69,12 +71,50 @@ function openPostDetail(id) {
                 `;
             }).join("");
         });
+
+    if (reactionUnsub) reactionUnsub();
+    reactionUnsub = db.collection("posts").doc(id).collection("reactions")
+        .onSnapshot(function(snapshot) {
+            renderReactionBar(snapshot.docs.map(function(doc) { return Object.assign({ uid: doc.id }, doc.data()); }));
+        });
+}
+
+// ✨ 이모지 반응 (부담 없이 가볍게 참여하는 용도라 마일리지는 안 걸음)
+function renderReactionBar(reactions) {
+    const myUid = auth.currentUser && auth.currentUser.uid;
+    const myReaction = reactions.find(function(r) { return r.uid === myUid; });
+
+    const barEl = document.getElementById("reaction-bar");
+    barEl.innerHTML = REACTION_EMOJIS.map(function(emoji) {
+        const count = reactions.filter(function(r) { return r.emoji === emoji; }).length;
+        const isMine = myReaction && myReaction.emoji === emoji;
+        return `
+            <button type="button" class="reaction-btn${isMine ? " mine" : ""}" data-emoji="${emoji}">
+                <span class="reaction-emoji">${emoji}</span>
+                ${count > 0 ? `<span class="reaction-count">${count}</span>` : ""}
+            </button>
+        `;
+    }).join("");
+
+    barEl.querySelectorAll(".reaction-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            if (!currentPostId || !myUid) return;
+            const emoji = btn.dataset.emoji;
+            const myRef = db.collection("posts").doc(currentPostId).collection("reactions").doc(myUid);
+            if (myReaction && myReaction.emoji === emoji) {
+                myRef.delete();  // 같은 이모지를 다시 누르면 반응 취소
+            } else {
+                myRef.set({ emoji: emoji, author: currentUserName(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            }
+        });
+    });
 }
 
 document.getElementById("back-to-list-btn").addEventListener("click", function() {
     document.getElementById("board-detail-view").style.display = "none";
     document.getElementById("board-list-view").style.display = "block";
     if (commentUnsub) { commentUnsub(); commentUnsub = null; }
+    if (reactionUnsub) { reactionUnsub(); reactionUnsub = null; }
 });
 
 document.getElementById("delete-post-btn").addEventListener("click", function() {
