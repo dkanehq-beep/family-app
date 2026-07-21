@@ -309,6 +309,7 @@ homeworkForm.addEventListener("submit", function(e) {
         showToast("숙제를 추가했어요");
         homeworkModal.classList.remove("open");
         homeworkForm.reset();
+        awardMileage(5, "숙제 등록: " + title);
     }).catch(function(err) {
         showToast("추가에 실패했어요: " + err.message);
     });
