@@ -664,6 +664,27 @@ a { color: inherit; }
 
 /* ✨ 마일리지 */
 #mileage-list { margin-bottom: 30px; }
+/* 순위 배지 - 1~3위는 메달 이모지, 나머지는 숫자 뱃지 */
+.mileage-rank {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-muted);
+    background: var(--bg-main);
+    border-radius: 50%;
+}
+.mileage-rank.medal { font-size: 21px; background: none; }
+/* 1위 카드는 골드 톤으로 은은하게 강조해서 리더보드 느낌을 살림 */
+.mileage-card.rank-1 {
+    border-color: rgba(184, 147, 90, 0.45);
+    background: linear-gradient(135deg, rgba(184, 147, 90, 0.1), var(--card-bg) 65%);
+    box-shadow: 0 6px 26px rgba(184, 147, 90, 0.2);
+}
 .mileage-card {
     display: flex;
     align-items: center;

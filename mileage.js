@@ -21,11 +21,16 @@ function renderMileageList() {
         listEl.innerHTML = '<p class="empty-hint">아직 적립된 마일리지가 없어요. 숙제를 체크하거나 게시글을 써보세요!</p>';
         return;
     }
-    listEl.innerHTML = allMileage.map(function(m) {
+    // 순위 배지 (1~3위는 메달, 그 아래는 숫자) - 마일리지가 0이면 순위를 매기지 않음
+    const MEDALS = { 1: "🥇", 2: "🥈", 3: "🥉" };
+    listEl.innerHTML = allMileage.map(function(m, index) {
         const total = m.total || 0;
         const krw = total * MILEAGE_RATE;
+        const rank = index + 1;
+        const rankLabel = total > 0 ? (MEDALS[rank] || `${rank}위`) : "";
         return `
-            <div class="mileage-card">
+            <div class="mileage-card${rank === 1 && total > 0 ? " rank-1" : ""}">
+                ${rankLabel ? `<span class="mileage-rank${MEDALS[rank] ? " medal" : ""}">${rankLabel}</span>` : ""}
                 <div class="mileage-card-info">
                     <span class="mileage-name">${escapeHtml(m.name)}</span>
                     <span class="mileage-total">${total} 마일리지</span>
