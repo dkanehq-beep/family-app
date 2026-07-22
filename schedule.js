@@ -181,14 +181,28 @@ function renderWeekDays() {
                     ${dayHomework.length === 0
                         ? '<p class="homework-empty">등록된 숙제가 없어요</p>'
                         : dayHomework.map(function(h) {
+                            const stamps = h.stamps || {};
+                            const stampNames = Object.values(stamps);
+                            const myUid = auth.currentUser && auth.currentUser.uid;
+                            const myStamped = myUid && stamps[myUid];
                             return `
                                 <div class="homework-item${h.done ? " done" : ""}" data-id="${h.id}">
-                                    <label class="toggle-switch sm homework-toggle">
-                                        <input type="checkbox" class="homework-toggle-input" data-id="${h.id}" ${h.done ? "checked" : ""}>
-                                        <span class="toggle-track"></span>
-                                    </label>
-                                    <span class="homework-text">${escapeHtml(h.title)}</span>
-                                    ${isOwner(h) ? `<button type="button" class="homework-del" data-id="${h.id}">✕</button>` : ""}
+                                    <div class="homework-item-main">
+                                        <label class="toggle-switch sm homework-toggle">
+                                            <input type="checkbox" class="homework-toggle-input" data-id="${h.id}" ${h.done ? "checked" : ""}>
+                                            <span class="toggle-track"></span>
+                                        </label>
+                                        <span class="homework-text">${escapeHtml(h.title)}</span>
+                                        ${isOwner(h) ? `<button type="button" class="homework-del" data-id="${h.id}">✕</button>` : ""}
+                                    </div>
+                                    ${h.done ? `
+                                        <div class="homework-stamp-row">
+                                            ${stampNames.length > 0
+                                                ? `<span class="homework-stamp">🎖️ 참 잘했어요</span><span class="homework-stamp-names">${stampNames.map(escapeHtml).join(", ")}</span>`
+                                                : `<span class="homework-stamp-names">아직 도장이 없어요</span>`}
+                                            <button type="button" class="homework-stamp-btn${myStamped ? " active" : ""}" data-id="${h.id}">${myStamped ? "도장 취소" : "👏 도장 찍기"}</button>
+                                        </div>
+                                    ` : ""}
                                 </div>
                             `;
                         }).join("")}
@@ -342,6 +356,22 @@ function bindHomeworkEvents() {
     document.querySelectorAll(".homework-del").forEach(function(btn) {
         btn.addEventListener("click", function() {
             db.collection("homework").doc(btn.dataset.id).delete();
+        });
+    });
+    // 완료된 숙제에 "참 잘했어요" 도장 찍기/취소 (본인 완료여도 다른 가족이 눌러줄 수 있음)
+    document.querySelectorAll(".homework-stamp-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            const myUid = auth.currentUser && auth.currentUser.uid;
+            if (!myUid) return;
+            const hw = allHomework.find(function(h) { return h.id === btn.dataset.id; });
+            const alreadyStamped = hw && hw.stamps && hw.stamps[myUid];
+            const fieldPath = "stamps." + myUid;
+            const hwRef = db.collection("homework").doc(btn.dataset.id);
+            if (alreadyStamped) {
+                hwRef.update({ [fieldPath]: firebase.firestore.FieldValue.delete() });
+            } else {
+                hwRef.update({ [fieldPath]: currentUserName() });
+            }
         });
     });
 }

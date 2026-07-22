@@ -1108,12 +1108,53 @@ a { color: inherit; }
 .homework-empty { font-size: 11.5px; color: var(--text-muted); font-weight: 300; padding: 4px 2px; }
 .homework-item {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    gap: 6px;
     background: var(--bg-main);
     border-radius: 9px;
     padding: 9px 10px;
 }
+.homework-item-main { display: flex; align-items: center; gap: 10px; }
+/* 완료된 숙제에 다른 가족이 남기는 "참 잘했어요" 도장 */
+.homework-stamp-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border-light);
+}
+.homework-stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #c0392b;
+    border: 1.5px solid #c0392b;
+    border-radius: 99px;
+    padding: 3px 10px;
+    transform: rotate(-4deg);  /* 진짜 도장 찍은 것처럼 살짝 기울임 */
+    flex-shrink: 0;
+}
+.homework-stamp-names { font-size: 10px; color: var(--text-muted); }
+.homework-stamp-btn {
+    background: none;
+    border: 1px solid var(--border-light);
+    border-radius: 99px;
+    padding: 4px 10px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+.homework-stamp-btn:hover { border-color: var(--primary); color: var(--primary); }
+.homework-stamp-btn.active { border-color: #c0392b; color: #c0392b; background: rgba(192, 57, 43, 0.08); }
+.homework-stamp-btn:active { transform: scale(0.92); }
 /* 숙제 완료 스위치 - 로그인 화면의 토글과 같은 부품을 작은 크기로 재사용 */
 .toggle-switch.sm { width: 32px; height: 18px; }
 .toggle-switch.sm .toggle-track::before { width: 14px; height: 14px; }
