@@ -156,21 +156,28 @@ document.getElementById("cashout-confirm-btn").addEventListener("click", functio
 renderMileageList();
 renderLogList();
 whenAuthReady(function() {
+    function onSubError(name) {
+        return function(err) {
+            showToast(name + "을(를) 불러오지 못했어요: " + err.message);
+            console.error(name + " 구독 실패:", err.message);
+        };
+    }
+
     db.collection("profiles").onSnapshot(function(snapshot) {
         allProfiles = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderMileageList();
-    });
+    }, onSubError("가족 명단"));
 
     db.collection("mileage").onSnapshot(function(snapshot) {
         allMileageTotals = {};
         snapshot.docs.forEach(function(doc) { allMileageTotals[doc.id] = doc.data(); });
         renderMileageList();
-    });
+    }, onSubError("마일리지"));
 
     db.collection("mileage_log").orderBy("createdAt", "desc").limit(30).onSnapshot(function(snapshot) {
         allLogs = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderLogList();
-    });
+    }, onSubError("마일리지 내역"));
 });
 
 // ✨ 누군가 아바타를 바꾸면 이름 옆 이모지도 바로 갱신
