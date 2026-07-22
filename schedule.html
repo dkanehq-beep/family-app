@@ -26,6 +26,7 @@
         <li><a href="travel.html">여행 추억</a></li>
         <li><a href="board.html">게시판</a></li>
     </ul>
+    <button id="account-btn" class="account-btn" aria-label="내 정보"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.2"/><path d="M5 20c1-3.8 4-6 7-6s6 2.2 7 6"/></svg></button>
     <button id="theme-toggle" class="theme-toggle-btn" aria-label="다크 모드 토글"></button>
     <button id="logout-btn" class="logout-btn">로그아웃</button>
 </nav>
@@ -112,6 +113,49 @@
                 <button type="submit" class="btn-primary">추가하기</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- 준비물 추가 모달 -->
+<div class="modal-overlay" id="supply-modal">
+    <div class="modal-box">
+        <button class="modal-close-x" id="supply-modal-close">✕</button>
+        <h3 id="supply-modal-title">준비물 추가</h3>
+        <form id="supply-form">
+            <div class="form-group">
+                <label>내용</label>
+                <input type="text" id="supply-title" placeholder="예: 수영복, 태권도복" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="supply-cancel-btn">취소</button>
+                <button type="submit" class="btn-primary">추가하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 내 정보 모달 -->
+<div class="modal-overlay" id="account-modal">
+    <div class="modal-box">
+        <button class="modal-close-x" id="account-modal-close">✕</button>
+        <h3>내 정보</h3>
+        <div class="form-group">
+            <label>이메일</label>
+            <p class="account-email" id="account-email"></p>
+        </div>
+        <form id="account-name-form">
+            <div class="form-group">
+                <label>이름</label>
+                <input type="text" id="account-name-input" placeholder="이름" required>
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="btn-primary">이름 저장</button>
+            </div>
+        </form>
+        <div class="form-group">
+            <label>아바타</label>
+            <div class="avatar-grid" id="account-avatar-grid"></div>
+        </div>
     </div>
 </div>
 

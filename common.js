@@ -68,6 +68,52 @@ whenAuthReady(function() {
     });
 });
 
+// ✨ 내 정보 모달 (이메일 확인 / 이름 변경 / 아바타 선택) - 모든 페이지 상단바에서 열 수 있음
+function initAccountModal() {
+    const btn = document.getElementById("account-btn");
+    const modal = document.getElementById("account-modal");
+    if (!btn || !modal) return;
+
+    btn.addEventListener("click", function() {
+        const user = auth.currentUser;
+        if (!user) return;
+        document.getElementById("account-email").textContent = user.email || "";
+        document.getElementById("account-name-input").value = user.displayName || "";
+
+        const grid = document.getElementById("account-avatar-grid");
+        const current = _profileAvatars[user.uid] || "";
+        grid.innerHTML = AVATAR_CHOICES.map(function(emoji) {
+            return `<button type="button" class="avatar-choice-btn${emoji === current ? " selected" : ""}" data-emoji="${emoji}">${emoji}</button>`;
+        }).join("");
+        grid.querySelectorAll(".avatar-choice-btn").forEach(function(choiceBtn) {
+            choiceBtn.addEventListener("click", function() {
+                db.collection("profiles").doc(user.uid).set({ avatar: choiceBtn.dataset.emoji }, { merge: true })
+                    .then(function() { showToast("아바타를 바꿨어요"); });
+            });
+        });
+
+        modal.classList.add("open");
+    });
+
+    document.getElementById("account-modal-close").addEventListener("click", function() { modal.classList.remove("open"); });
+    modal.addEventListener("click", function(e) { if (e.target === modal) modal.classList.remove("open"); });
+
+    document.getElementById("account-name-form").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const name = document.getElementById("account-name-input").value.trim();
+        if (!name) return;
+        auth.currentUser.updateProfile({ displayName: name })
+            .then(function() {
+                syncMyProfile(auth.currentUser);
+                showToast("이름을 저장했어요");
+            })
+            .catch(function(err) {
+                showToast("저장에 실패했어요: " + err.message);
+            });
+    });
+}
+initAccountModal();
+
 // ✨ 오늘 날짜 (YYYY-MM-DD) - 하루 한 번 제한 체크용
 function todayKeyForMileage() {
     const d = new Date();

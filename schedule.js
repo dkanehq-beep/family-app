@@ -11,6 +11,7 @@ let currentKidId = null;
 let allSchedule = [];
 let allHomework = [];
 let allAcademies = [];  // 학원은 하루에 여러 곳 다닐 수 있어서 항목마다 별도 문서로 관리
+let allSupplies = [];   // 준비물 체크리스트 (숙제와 같은 구조, 별도 컬렉션)
 let currentMonday = getMonday(new Date());
 
 function pad2(n) { return String(n).padStart(2, "0"); }
@@ -111,6 +112,7 @@ function renderWeekDays() {
         const sched = allSchedule.find(function(s) { return s.kidId === currentKidId && s.day === i; }) || {};
         const dayHomework = allHomework.filter(function(h) { return h.kidId === currentKidId && h.date === dateKey; });
         const dayAcademies = allAcademies.filter(function(a) { return a.kidId === currentKidId && a.day === i; });
+        const daySupplies = allSupplies.filter(function(s) { return s.kidId === currentKidId && s.date === dateKey; });
 
         const card = document.createElement("div");
         card.className = "day-card" + (dateKey === todayKey ? " is-today" : "");
@@ -166,6 +168,28 @@ function renderWeekDays() {
                         }).join("")}
                 </div>
             </div>
+            <div class="supply-section">
+                <div class="supply-header">
+                    <span>준비물</span>
+                    <button type="button" class="supply-add-btn" data-date="${dateKey}">+ 추가</button>
+                </div>
+                <div class="supply-items">
+                    ${daySupplies.length === 0
+                        ? '<p class="supply-empty">등록된 준비물이 없어요</p>'
+                        : daySupplies.map(function(s) {
+                            return `
+                                <div class="supply-item${s.done ? " done" : ""}" data-id="${s.id}">
+                                    <label class="toggle-switch sm supply-toggle">
+                                        <input type="checkbox" class="supply-toggle-input" data-id="${s.id}" ${s.done ? "checked" : ""}>
+                                        <span class="toggle-track"></span>
+                                    </label>
+                                    <span class="supply-text">${escapeHtml(s.title)}</span>
+                                    ${isOwner(s) ? `<button type="button" class="supply-del" data-id="${s.id}">✕</button>` : ""}
+                                </div>
+                            `;
+                        }).join("")}
+                </div>
+            </div>
         `;
         container.appendChild(card);
     }
@@ -173,6 +197,7 @@ function renderWeekDays() {
     bindDayFieldEvents();
     bindAcademyEvents();
     bindHomeworkEvents();
+    bindSupplyEvents();
 }
 
 // ✨ 하교/학원 입력 저장 (입력창을 벗어날 때 자동 저장 + "저장" 버튼으로 직접 저장 둘 다 지원)
@@ -315,6 +340,64 @@ homeworkForm.addEventListener("submit", function(e) {
     });
 });
 
+// ✨ 준비물 체크리스트 추가/토글/삭제 (숙제와 같은 구조, 마일리지는 안 걸음)
+let supplyTargetDate = null;
+const supplyModal = document.getElementById("supply-modal");
+const supplyForm = document.getElementById("supply-form");
+
+function bindSupplyEvents() {
+    document.querySelectorAll(".supply-add-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            supplyTargetDate = btn.dataset.date;
+            const d = new Date(supplyTargetDate);
+            document.getElementById("supply-modal-title").textContent =
+                `${d.getMonth() + 1}월 ${d.getDate()}일 준비물 추가`;
+            supplyModal.classList.add("open");
+        });
+    });
+    document.querySelectorAll(".supply-toggle-input").forEach(function(input) {
+        input.addEventListener("change", function() {
+            db.collection("supplies").doc(input.dataset.id).update({ done: input.checked });
+        });
+    });
+    document.querySelectorAll(".supply-text").forEach(function(el) {
+        el.addEventListener("click", function() {
+            const item = el.closest(".supply-item");
+            const input = item.querySelector(".supply-toggle-input");
+            input.checked = !input.checked;
+            input.dispatchEvent(new Event("change"));
+        });
+    });
+    document.querySelectorAll(".supply-del").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            db.collection("supplies").doc(btn.dataset.id).delete();
+        });
+    });
+}
+
+document.getElementById("supply-modal-close").addEventListener("click", function() { supplyModal.classList.remove("open"); });
+document.getElementById("supply-cancel-btn").addEventListener("click", function() { supplyModal.classList.remove("open"); });
+supplyModal.addEventListener("click", function(e) { if (e.target === supplyModal) supplyModal.classList.remove("open"); });
+
+supplyForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const title = document.getElementById("supply-title").value.trim();
+    db.collection("supplies").add({
+        kidId: currentKidId,
+        date: supplyTargetDate,
+        title: title,
+        done: false,
+        ownerUid: auth.currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+        showToast("준비물을 추가했어요");
+        supplyModal.classList.remove("open");
+        supplyForm.reset();
+    }).catch(function(err) {
+        showToast("추가에 실패했어요: " + err.message);
+    });
+});
+
 // ✨ 화면 틀(아이 탭 + 주간 라벨)은 데이터 도착 전에 즉시 그린다
 renderWeekLabel();
 renderKidTabs();
@@ -352,4 +435,9 @@ whenAuthReady(function() {
         allAcademies = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderWeekDays();
     }, onSubError("academies"));
+
+    db.collection("supplies").onSnapshot(function(snapshot) {
+        allSupplies = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderWeekDays();
+    }, onSubError("supplies"));
 });
