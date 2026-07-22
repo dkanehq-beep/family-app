@@ -1,18 +1,18 @@
-/* ⚜️ 가족 앱 - 딥 테라코타 & 아이보리 팔레트 (에디토리얼 톤) */
+/* ⚜️ 가족 앱 - 화사한 코럴 & 크림 팔레트 */
 :root {
-    --primary: #c9663a;
-    --primary-dark: #a54f2c;
-    --primary-light: rgba(201, 102, 58, 0.08);
-    --accent: #b8935a;
-    --blue: #4f7d8c;
-    --plum: #8a5a6b;
-    --deep: #2c2420;
-    --bg-main: #faf6f1;
-    --card-bg: #fffdfb;
-    --text-main: #2c2420;
-    --text-muted: #8d7d70;
+    --primary: #FF7A59;
+    --primary-dark: #E85A3D;
+    --primary-light: rgba(255, 122, 89, 0.08);
+    --accent: #FFB74D;
+    --blue: #29ABD4;
+    --plum: #F06BA8;
+    --deep: #4A2A1F;
+    --bg-main: #FFF9F4;
+    --card-bg: #FFFFFF;
+    --text-main: #33241D;
+    --text-muted: #A08977;
     --border-light: rgba(44, 36, 32, 0.08);
-    --border-accent: rgba(201, 102, 58, 0.25);
+    --border-accent: rgba(255, 122, 89, 0.25);
     /* 그림자를 더 낮고 넓게 퍼뜨려서 또렷한 경계 대신 부드럽게 스며드는 느낌으로 */
     --shadow-sm: 0 3px 18px rgba(44, 36, 32, 0.045);
     --shadow-md: 0 16px 36px rgba(44, 36, 32, 0.07);
@@ -23,13 +23,13 @@
 /* 🌙 다크 모드 */
 body.dark-mode {
     color-scheme: dark;
-    --primary-light: rgba(201, 102, 58, 0.14);
-    --bg-main: #1c1512;
-    --card-bg: #251d19;
-    --text-main: #f2e9e2;
-    --text-muted: #a8988c;
+    --primary-light: rgba(255, 122, 89, 0.14);
+    --bg-main: #241A15;
+    --card-bg: #2C211B;
+    --text-main: #FDF3EC;
+    --text-muted: #B8A698;
     --border-light: rgba(242, 233, 226, 0.08);
-    --border-accent: rgba(201, 102, 58, 0.35);
+    --border-accent: rgba(255, 122, 89, 0.35);
     --shadow-sm: 0 2px 14px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 14px 30px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 26px 60px rgba(0, 0, 0, 0.55);
@@ -62,7 +62,7 @@ body {
     color: var(--text-main);
     min-height: 100vh;
     background-image:
-        radial-gradient(circle at 92% 0%, rgba(184, 147, 90, 0.10) 0%, transparent 42%),
+        radial-gradient(circle at 92% 0%, rgba(255, 183, 77, 0.10) 0%, transparent 42%),
         radial-gradient(circle at 0% 100%, rgba(79, 125, 140, 0.06) 0%, transparent 42%);
     position: relative;
     touch-action: manipulation;
@@ -96,7 +96,7 @@ a { color: inherit; }
     padding: 20px;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(160deg, #241713 0%, #4a2818 45%, #c9663a 100%);
+    background: linear-gradient(160deg, #3D2118 0%, #7A3B24 45%, #FF7A59 100%);
 }
 .login-wrapper::before {
     content: '';
@@ -134,8 +134,8 @@ a { color: inherit; }
     height: 72px;
     border-radius: 50%;
     margin: 0 auto 22px auto;
-    background: linear-gradient(135deg, #e2935f, var(--primary));
-    box-shadow: 0 12px 28px rgba(201, 102, 58, 0.4), 0 0 0 4px rgba(255,255,255,0.6);
+    background: linear-gradient(135deg, #FFA383, var(--primary));
+    box-shadow: 0 12px 28px rgba(255, 122, 89, 0.4), 0 0 0 4px rgba(255,255,255,0.6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -173,7 +173,7 @@ a { color: inherit; }
 .login-card input:focus {
     border-color: var(--primary);
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(201, 102, 58, 0.12);
+    box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.12);
 }
 .login-options {
     display: flex;
@@ -224,17 +224,17 @@ a { color: inherit; }
     transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .toggle-switch input:checked + .toggle-track {
-    background: linear-gradient(135deg, #e2935f, var(--primary-dark));
+    background: linear-gradient(135deg, #FFA383, var(--primary-dark));
 }
 .toggle-switch input:checked + .toggle-track::before {
     transform: translateX(14px);
 }
 .toggle-switch input:focus-visible + .toggle-track {
-    box-shadow: 0 0 0 3px rgba(201, 102, 58, 0.25);
+    box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.25);
 }
 .login-btn {
     width: 100%;
-    background: linear-gradient(135deg, #4a2c1f, var(--deep));
+    background: linear-gradient(135deg, #6B3A26, var(--deep));
     color: #fdf8f2;
     border: none;
     padding: 15px;
@@ -248,11 +248,11 @@ a { color: inherit; }
     box-shadow: 0 10px 24px rgba(44, 36, 32, 0.25);
 }
 .login-btn:hover {
-    background: linear-gradient(135deg, var(--primary), #d9814f);
+    background: linear-gradient(135deg, var(--primary), #FFA383);
     transform: translateY(-2px);
-    box-shadow: 0 14px 32px rgba(201, 102, 58, 0.4);
+    box-shadow: 0 14px 32px rgba(255, 122, 89, 0.4);
 }
-.login-btn:active { transform: scale(0.98); box-shadow: 0 6px 16px rgba(201, 102, 58, 0.3); }
+.login-btn:active { transform: scale(0.98); box-shadow: 0 6px 16px rgba(255, 122, 89, 0.3); }
 .login-btn:disabled { opacity: 0.6; cursor: default; transform: none; }
 .login-error {
     display: none;
@@ -308,7 +308,7 @@ a { color: inherit; }
     content: '';
     width: 26px; height: 26px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #e2935f, var(--primary));
+    background: linear-gradient(135deg, #FFA383, var(--primary));
     flex-shrink: 0;
 }
 .topbar-nav {
@@ -337,7 +337,7 @@ a { color: inherit; }
     background: var(--primary-light);
     font-weight: 700;
 }
-.topbar-nav a:active { background: rgba(201, 102, 58, 0.16); }
+.topbar-nav a:active { background: rgba(255, 122, 89, 0.16); }
 .logout-btn {
     background: none;
     border: 1px solid var(--border-light);
@@ -427,7 +427,7 @@ a { color: inherit; }
     padding: 24px 26px;
     margin-bottom: 28px;
     border-radius: 20px;
-    background: linear-gradient(155deg, #3a231a 0%, #6b3a24 55%, var(--primary) 100%);
+    background: linear-gradient(155deg, #5A2E1E 0%, #8F4A2C 55%, var(--primary) 100%);
     box-shadow: 0 16px 36px rgba(44, 24, 16, 0.2);
     position: relative;
     overflow: hidden;
@@ -491,7 +491,7 @@ a { color: inherit; }
     cursor: pointer;
     transition: background 0.2s;
 }
-.announce-add-btn:hover { background: rgba(201, 102, 58, 0.18); }
+.announce-add-btn:hover { background: rgba(255, 122, 89, 0.18); }
 .announce-add-btn:active { transform: scale(0.95); }
 .announce-card {
     background: var(--card-bg);
@@ -564,7 +564,7 @@ a { color: inherit; }
 .dash-card:hover .dash-card-icon { transform: scale(1.08) rotate(-4deg); }
 .dash-card:nth-child(1) .dash-card-icon { background: var(--primary-light); color: var(--primary); }
 .dash-card:nth-child(2) .dash-card-icon { background: rgba(79, 125, 140, 0.1); color: var(--blue); }
-.dash-card:nth-child(3) .dash-card-icon { background: rgba(184, 147, 90, 0.15); color: var(--accent); }
+.dash-card:nth-child(3) .dash-card-icon { background: rgba(255, 183, 77, 0.15); color: var(--accent); }
 .dash-card:nth-child(4) .dash-card-icon { background: rgba(138, 90, 107, 0.12); color: var(--plum); }
 .dash-card h3 { font-size: 12.5px; font-weight: 700; }
 
@@ -604,7 +604,7 @@ a { color: inherit; }
     cursor: pointer;
     transition: background 0.2s;
 }
-.section-add-btn:hover { background: rgba(201, 102, 58, 0.18); }
+.section-add-btn:hover { background: rgba(255, 122, 89, 0.18); }
 .section-add-btn:active { transform: scale(0.95); }
 .show-more-btn {
     display: block;
@@ -681,7 +681,7 @@ a { color: inherit; }
 .poll-option-bar {
     position: absolute;
     left: 0; top: 0; bottom: 0;
-    background: linear-gradient(90deg, rgba(201, 102, 58, 0.14), rgba(184, 147, 90, 0.16));
+    background: linear-gradient(90deg, rgba(255, 122, 89, 0.14), rgba(255, 183, 77, 0.16));
     z-index: 0;
     transition: width 0.4s cubic-bezier(0.25,1,0.5,1);
 }
@@ -708,9 +708,9 @@ a { color: inherit; }
 .mileage-rank.medal { font-size: 21px; background: none; }
 /* 1위 카드는 골드 톤으로 은은하게 강조해서 리더보드 느낌을 살림 */
 .mileage-card.rank-1 {
-    border-color: rgba(184, 147, 90, 0.45);
-    background: linear-gradient(135deg, rgba(184, 147, 90, 0.1), var(--card-bg) 65%);
-    box-shadow: 0 6px 26px rgba(184, 147, 90, 0.2);
+    border-color: rgba(255, 183, 77, 0.45);
+    background: linear-gradient(135deg, rgba(255, 183, 77, 0.1), var(--card-bg) 65%);
+    box-shadow: 0 6px 26px rgba(255, 183, 77, 0.2);
 }
 .mileage-card {
     display: flex;
@@ -862,10 +862,10 @@ a { color: inherit; }
     transition: background 0.2s;
 }
 .cal-day:hover { background: var(--primary-light); }
-.cal-day:active { background: rgba(201, 102, 58, 0.16); }
+.cal-day:active { background: rgba(255, 122, 89, 0.16); }
 .cal-day.empty { cursor: default; }
 .cal-day.empty:hover, .cal-day.empty:active { background: none; }
-.cal-day.today { background: rgba(201, 102, 58, 0.09); }
+.cal-day.today { background: rgba(255, 122, 89, 0.09); }
 .cal-day-num { font-size: 12px; font-weight: 600; color: var(--text-muted); }
 .cal-day.today .cal-day-num { color: var(--primary); font-weight: 800; }
 .cal-event-dot {
@@ -966,10 +966,10 @@ a { color: inherit; }
 .kid-tab:hover { border-color: var(--primary); color: var(--primary); }
 .kid-tab:active { transform: scale(0.95); }
 .kid-tab.active {
-    background: linear-gradient(135deg, #e2935f, var(--primary));
+    background: linear-gradient(135deg, #FFA383, var(--primary));
     border-color: var(--primary);
     color: #fff;
-    box-shadow: 0 6px 16px rgba(201, 102, 58, 0.3);
+    box-shadow: 0 6px 16px rgba(255, 122, 89, 0.3);
 }
 .kid-tab-add {
     background: none;
@@ -984,7 +984,7 @@ a { color: inherit; }
     box-shadow: var(--shadow-sm);
     margin-bottom: 14px;
 }
-.day-card.is-today { border-color: var(--border-accent); box-shadow: 0 0 0 3px rgba(201, 102, 58, 0.08); }
+.day-card.is-today { border-color: var(--border-accent); box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.08); }
 .day-card-header {
     display: flex;
     align-items: baseline;
@@ -1021,7 +1021,7 @@ a { color: inherit; }
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
-.day-field-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(201, 102, 58, 0.1); }
+.day-field-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.1); }
 .day-field-save-btn {
     flex-shrink: 0;
     background: var(--primary-light);
@@ -1035,7 +1035,7 @@ a { color: inherit; }
     cursor: pointer;
     transition: background 0.2s, transform 0.15s;
 }
-.day-field-save-btn:hover { background: rgba(201, 102, 58, 0.18); }
+.day-field-save-btn:hover { background: rgba(255, 122, 89, 0.18); }
 .day-field-save-btn:active { transform: scale(0.92); }
 
 /* 학원 (하루에 여러 곳 등록 가능) - 숙제 섹션과 같은 뼈대를 재사용 */
@@ -1058,7 +1058,7 @@ a { color: inherit; }
     cursor: pointer;
     transition: background 0.2s;
 }
-.academy-add-btn:hover { background: rgba(201, 102, 58, 0.18); }
+.academy-add-btn:hover { background: rgba(255, 122, 89, 0.18); }
 .academy-add-btn:active { transform: scale(0.94); }
 .academy-items { display: flex; flex-direction: column; gap: 6px; }
 .academy-empty { font-size: 11.5px; color: var(--text-muted); font-weight: 300; padding: 4px 2px; }
@@ -1102,7 +1102,7 @@ a { color: inherit; }
     cursor: pointer;
     transition: background 0.2s;
 }
-.homework-add-btn:hover { background: rgba(201, 102, 58, 0.18); }
+.homework-add-btn:hover { background: rgba(255, 122, 89, 0.18); }
 .homework-add-btn:active { transform: scale(0.94); }
 .homework-items { display: flex; flex-direction: column; gap: 6px; }
 .homework-empty { font-size: 11.5px; color: var(--text-muted); font-weight: 300; padding: 4px 2px; }
@@ -1302,7 +1302,7 @@ a { color: inherit; }
 .form-group textarea { height: auto; padding: 12px 14px; line-height: 1.5; }
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(201, 102, 58, 0.1);
+    box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.1);
 }
 
 /* ✨ 직접 입력 + 네이티브 선택기 하이브리드 (날짜/시간) */
@@ -1325,7 +1325,7 @@ a { color: inherit; }
     transition: background 0.2s;
 }
 .hybrid-pick-btn svg { width: 17px; height: 17px; }
-.hybrid-pick-btn:hover { background: rgba(201, 102, 58, 0.16); }
+.hybrid-pick-btn:hover { background: rgba(255, 122, 89, 0.16); }
 .hybrid-pick-btn:active { transform: translateY(-50%) scale(0.9); }
 .native-picker-hidden {
     position: absolute;
@@ -1812,7 +1812,7 @@ body.dark-mode .cal-holiday-name { color: #f0846b; }
     cursor: pointer;
     transition: background 0.2s;
 }
-.supply-add-btn:hover { background: rgba(201, 102, 58, 0.18); }
+.supply-add-btn:hover { background: rgba(255, 122, 89, 0.18); }
 .supply-add-btn:active { transform: scale(0.94); }
 .supply-items { display: flex; flex-direction: column; gap: 6px; }
 .supply-empty { font-size: 11.5px; color: var(--text-muted); font-weight: 300; padding: 4px 2px; }
