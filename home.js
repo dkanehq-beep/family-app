@@ -171,6 +171,7 @@ function renderEventWishes() {
             }).then(function() {
                 input.value = "";
                 showToast("메시지를 남겼어요 🎉");
+                awardMileage(3, "축하 메시지 작성", "wish");
             }).catch(function(err) {
                 showToast("등록에 실패했어요: " + err.message);
             });
@@ -571,6 +572,7 @@ announceForm.addEventListener("submit", function(e) {
         showToast("공지를 등록했어요 📢");
         announceModal.classList.remove("open");
         announceForm.reset();
+        awardMileage(5, "공지 작성", "announce");
     }).catch(function(err) {
         showToast("등록에 실패했어요: " + err.message);
     }).finally(function() {

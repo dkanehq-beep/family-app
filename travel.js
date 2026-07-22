@@ -193,6 +193,7 @@ tripForm.addEventListener("submit", function(e) {
         .then(function() {
             showToast("여행 추억이 등록되었어요 ✈️");
             closeTripModal();
+            awardMileage(15, "여행 추억 등록: " + title);
         })
         .catch(function(err) {
             showToast("등록에 실패했어요: " + err.message);

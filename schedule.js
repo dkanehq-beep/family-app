@@ -268,6 +268,7 @@ academyForm.addEventListener("submit", function(e) {
         showToast("학원을 추가했어요");
         academyModal.classList.remove("open");
         academyForm.reset();
+        awardMileage(5, "학원 등록: " + name);
     }).catch(function(err) {
         showToast("추가에 실패했어요: " + err.message);
     });

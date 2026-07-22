@@ -229,6 +229,7 @@ eventForm.addEventListener("submit", function(e) {
         .then(function() {
             showToast("일정이 등록되었어요 🎉");
             closeEventModal();
+            awardMileage(5, "일정 등록: " + data.title);
         })
         .catch(function() {
             showToast("등록에 실패했어요. 다시 시도해 주세요.");
