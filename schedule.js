@@ -38,6 +38,7 @@ function renderKidTabs() {
         tab.addEventListener("click", function() {
             currentKidId = kid.id;
             renderKidTabs();
+            renderProfileToggle();
             renderWeekDays();
         });
         wrap.appendChild(tab);
@@ -53,6 +54,29 @@ function renderKidTabs() {
 
     document.getElementById("no-kid-hint").style.display = allKids.length === 0 ? "block" : "none";
     document.getElementById("week-days").style.display = allKids.length === 0 ? "none" : "block";
+}
+
+// ✨ 학기 중 / 방학 중 전환 (아이마다 따로 저장, 학원·하교시간만 구분되고 숙제·준비물은 날짜 기준이라 그대로)
+function currentProfile() {
+    const kid = allKids.find(function(k) { return k.id === currentKidId; });
+    return (kid && kid.activeProfile) || "term";
+}
+
+function renderProfileToggle() {
+    const wrap = document.getElementById("profile-toggle");
+    if (!wrap) return;
+    if (!currentKidId) { wrap.innerHTML = ""; return; }
+    const active = currentProfile();
+    wrap.innerHTML = `
+        <button type="button" class="profile-toggle-btn${active === "term" ? " active" : ""}" data-profile="term">학기 중</button>
+        <button type="button" class="profile-toggle-btn${active === "vacation" ? " active" : ""}" data-profile="vacation">방학 중</button>
+    `;
+    wrap.querySelectorAll(".profile-toggle-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            if (!currentKidId) return;
+            db.collection("kids").doc(currentKidId).update({ activeProfile: btn.dataset.profile });
+        });
+    });
 }
 
 const kidModal = document.getElementById("kid-modal");
@@ -109,9 +133,11 @@ function renderWeekDays() {
         const dateObj = new Date(currentMonday);
         dateObj.setDate(dateObj.getDate() + i);
         const dateKey = formatDateKey(dateObj);
-        const sched = allSchedule.find(function(s) { return s.kidId === currentKidId && s.day === i; }) || {};
+        const profile = currentProfile();
+        // 하교시간/학원은 학기중·방학중을 따로 저장하므로 profile이 일치하는 것만 (기존 데이터는 profile이 없어서 "term"으로 간주)
+        const sched = allSchedule.find(function(s) { return s.kidId === currentKidId && s.day === i && (s.profile || "term") === profile; }) || {};
         const dayHomework = allHomework.filter(function(h) { return h.kidId === currentKidId && h.date === dateKey; });
-        const dayAcademies = allAcademies.filter(function(a) { return a.kidId === currentKidId && a.day === i; });
+        const dayAcademies = allAcademies.filter(function(a) { return a.kidId === currentKidId && a.day === i && (a.profile || "term") === profile; });
         const daySupplies = allSupplies.filter(function(s) { return s.kidId === currentKidId && s.date === dateKey; });
 
         const card = document.createElement("div");
@@ -202,8 +228,10 @@ function renderWeekDays() {
 
 // ✨ 하교/학원 입력 저장 (입력창을 벗어날 때 자동 저장 + "저장" 버튼으로 직접 저장 둘 다 지원)
 function saveDayField(day, field, value) {
-    const docId = `${currentKidId}_${day}`;
-    const data = { kidId: currentKidId, day: day };
+    const profile = currentProfile();
+    // "학기 중"은 기존 문서 id를 그대로 써서 예전 데이터와 이어지게 하고, "방학 중"만 별도 문서로 분리
+    const docId = profile === "vacation" ? `${currentKidId}_vacation_${day}` : `${currentKidId}_${day}`;
+    const data = { kidId: currentKidId, day: day, profile: profile };
     data[field] = value.trim();
     return db.collection("weekly_schedule").doc(docId).set(data, { merge: true })
         .then(function() { showToast("저장했어요"); })
@@ -259,6 +287,7 @@ academyForm.addEventListener("submit", function(e) {
     db.collection("academies").add({
         kidId: currentKidId,
         day: academyTargetDay,
+        profile: currentProfile(),
         name: name,
         start: start,
         end: end,
@@ -402,6 +431,7 @@ supplyForm.addEventListener("submit", function(e) {
 // ✨ 화면 틀(아이 탭 + 주간 라벨)은 데이터 도착 전에 즉시 그린다
 renderWeekLabel();
 renderKidTabs();
+renderProfileToggle();
 
 // ✨ Firestore 실시간 동기화 — 로그인 확인이 끝난 뒤에만 구독 시작
 whenAuthReady(function() {
@@ -419,6 +449,7 @@ whenAuthReady(function() {
             currentKidId = allKids.length > 0 ? allKids[0].id : null;
         }
         renderKidTabs();
+        renderProfileToggle();
         renderWeekDays();
     }, onSubError("kids"));
 

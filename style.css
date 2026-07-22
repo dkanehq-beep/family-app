@@ -1832,3 +1832,31 @@ body.dark-mode .cal-holiday-name { color: #f0846b; }
     cursor: pointer;
 }
 .supply-item.done .supply-text { color: var(--text-muted); text-decoration: line-through; }
+
+/* 학기 중 / 방학 중 전환 스위치 (아이마다 따로 상태 저장) */
+.profile-toggle {
+    display: inline-flex;
+    background: var(--bg-main);
+    border: 1px solid var(--border-light);
+    border-radius: 99px;
+    padding: 3px;
+    margin-bottom: 22px;
+    gap: 2px;
+}
+.profile-toggle-btn {
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 99px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.profile-toggle-btn.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 122, 89, 0.3);
+}
+.profile-toggle-btn:active { transform: scale(0.95); }

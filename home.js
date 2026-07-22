@@ -369,7 +369,9 @@ function renderTodaySummary() {
     const monday = getWeekMonday(new Date());
 
     listEl.innerHTML = todayKids.map(function(kid) {
-        const sched = todaySchedule.find(function(s) { return s.kidId === kid.id && s.day === dayIdx; }) || {};
+        // 하교시간/학원은 학기중·방학중을 따로 저장하므로, 이 아이가 지금 어느 쪽인지에 맞는 것만 가져옴
+        const profile = kid.activeProfile || "term";
+        const sched = todaySchedule.find(function(s) { return s.kidId === kid.id && s.day === dayIdx && (s.profile || "term") === profile; }) || {};
 
         // 이번 주 월~일 중 등록된 숙제가 전부 완료 체크된 요일만 뱃지로 표시
         const doneDays = [];
@@ -383,7 +385,7 @@ function renderTodaySummary() {
             }
         }
 
-        const kidAcademies = todayAcademies.filter(function(a) { return a.kidId === kid.id && a.day === dayIdx; });
+        const kidAcademies = todayAcademies.filter(function(a) { return a.kidId === kid.id && a.day === dayIdx && (a.profile || "term") === profile; });
 
         const parts = [];
         parts.push(`하교 <b>${sched.dismissal ? escapeHtml(sched.dismissal) : "미등록"}</b>`);
