@@ -1979,3 +1979,28 @@ body.dark-mode .cal-holiday-name { color: #f0846b; }
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* ✨ 마일리지 리워드 상점 */
+.reward-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 10px;
+    transition: transform 0.3s cubic-bezier(0.25,1,0.5,1), box-shadow 0.3s;
+}
+.reward-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.reward-card-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.reward-name { font-family: 'Noto Serif KR', serif; font-size: 14.5px; font-weight: 700; color: var(--text-main); }
+.reward-cost { font-size: 12px; font-weight: 700; color: var(--primary); }
+.reward-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.reward-redeem-btn { padding: 9px 16px; font-size: 12px; }
+.reward-redeem-btn:disabled { opacity: 0.4; cursor: default; }
+.reward-del { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; }
+.reward-del:hover { color: #b3492f; }
+.reward-del:active { opacity: 0.5; }

@@ -147,6 +147,14 @@ service cloud.firestore {
       allow delete: if isOwner(resource.data);
     }
 
+    // 마일리지 리워드 상점 (교환 자체는 mileage/mileage_log 규칙으로 처리되고,
+    // 여기는 리워드 "정의"만 관리 - 삭제는 만든 사람만)
+    match /rewards/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow delete: if isOwner(resource.data);
+    }
+
     // 그 외 컬렉션은 기본 차단
     match /{document=**} {
       allow read, write: if false;

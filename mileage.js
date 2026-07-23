@@ -15,6 +15,12 @@ function formatLogDate(ts) {
 let allProfiles = [];     // 가입한 가족 전체 명단 (로그인할 때마다 자동 기록됨)
 let allMileageTotals = {}; // uid -> { name, total }
 let allLogs = [];
+let allRewards = [];       // 마일리지 상점에 등록된 리워드 목록
+
+function myMileageTotal() {
+    const myUid = auth.currentUser && auth.currentUser.uid;
+    return (myUid && allMileageTotals[myUid] && allMileageTotals[myUid].total) || 0;
+}
 
 // 명단(profiles) + 마일리지 총합을 합쳐서, 마일리지가 0이라 아직 mileage 문서가 없는
 // 사람도 랭킹에 같이 뜨게 함
@@ -108,6 +114,98 @@ function renderLogList() {
     }).join("");
 }
 
+// ✨ 마일리지 상점 - 가족이 직접 만든 리워드를 마일리지로 교환
+const rewardModal = document.getElementById("reward-modal");
+const rewardForm = document.getElementById("reward-form");
+const redeemModal = document.getElementById("redeem-modal");
+let redeemTarget = null;
+
+function renderRewardList() {
+    const listEl = document.getElementById("reward-list");
+    if (allRewards.length === 0) {
+        listEl.innerHTML = '<p class="empty-hint">아직 등록된 리워드가 없어요. 가족이 원하는 걸 추가해보세요!</p>';
+        return;
+    }
+    const myTotal = myMileageTotal();
+    listEl.innerHTML = allRewards.map(function(r) {
+        const affordable = myTotal >= r.cost;
+        return `
+            <div class="reward-card">
+                <div class="reward-card-info">
+                    <span class="reward-name">${escapeHtml(r.name)}</span>
+                    <span class="reward-cost">${r.cost} 마일리지</span>
+                </div>
+                <div class="reward-card-actions">
+                    <button type="button" class="btn-secondary reward-redeem-btn" data-id="${r.id}" ${affordable ? "" : "disabled"}>교환하기</button>
+                    ${isOwner(r) ? `<button type="button" class="reward-del" data-id="${r.id}">✕</button>` : ""}
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    listEl.querySelectorAll(".reward-redeem-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            const reward = allRewards.find(function(r) { return r.id === btn.dataset.id; });
+            if (reward) openRedeemModal(reward);
+        });
+    });
+    listEl.querySelectorAll(".reward-del").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            if (!confirm("이 리워드를 삭제할까요?")) return;
+            db.collection("rewards").doc(btn.dataset.id).delete();
+        });
+    });
+}
+
+document.getElementById("reward-add-btn").addEventListener("click", function() { rewardModal.classList.add("open"); });
+document.getElementById("reward-modal-close").addEventListener("click", function() { rewardModal.classList.remove("open"); });
+document.getElementById("reward-cancel-btn").addEventListener("click", function() { rewardModal.classList.remove("open"); });
+rewardModal.addEventListener("click", function(e) { if (e.target === rewardModal) rewardModal.classList.remove("open"); });
+
+rewardForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const name = document.getElementById("reward-name").value.trim();
+    const cost = Number(document.getElementById("reward-cost").value);
+    db.collection("rewards").add({
+        name: name,
+        cost: cost,
+        ownerUid: auth.currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+        showToast("리워드를 추가했어요");
+        rewardModal.classList.remove("open");
+        rewardForm.reset();
+    }).catch(function(err) {
+        showToast("추가에 실패했어요: " + err.message);
+    });
+});
+
+function openRedeemModal(reward) {
+    if (myMileageTotal() < reward.cost) {
+        showToast("마일리지가 부족해요.");
+        return;
+    }
+    redeemTarget = reward;
+    document.getElementById("redeem-desc").textContent =
+        `"${reward.name}"을(를) ${reward.cost}마일리지로 교환할까요? 확인하면 마일리지가 차감되고, 내역에 남아 가족 모두가 볼 수 있어요.`;
+    redeemModal.classList.add("open");
+}
+document.getElementById("redeem-modal-close").addEventListener("click", function() { redeemModal.classList.remove("open"); });
+document.getElementById("redeem-cancel-btn").addEventListener("click", function() { redeemModal.classList.remove("open"); });
+redeemModal.addEventListener("click", function(e) { if (e.target === redeemModal) redeemModal.classList.remove("open"); });
+
+document.getElementById("redeem-confirm-btn").addEventListener("click", function() {
+    if (!redeemTarget) return;
+    if (myMileageTotal() < redeemTarget.cost) {
+        showToast("마일리지가 부족해요.");
+        redeemModal.classList.remove("open");
+        return;
+    }
+    awardMileage(-redeemTarget.cost, `리워드 교환: ${redeemTarget.name}`);
+    showToast(`"${redeemTarget.name}" 교환 완료! 🎁`);
+    redeemModal.classList.remove("open");
+});
+
 // ✨ 캐쉬전환 모달 (마일리지를 실제 현금으로 바꿨다고 기록 → 모두가 보는 내역에 남음)
 let cashoutTarget = null;
 const cashoutModal = document.getElementById("cashout-modal");
@@ -155,6 +253,7 @@ document.getElementById("cashout-confirm-btn").addEventListener("click", functio
 // ✨ Firestore 실시간 동기화 — 로그인 확인 후 구독 시작
 renderMileageList();
 renderLogList();
+renderRewardList();
 whenAuthReady(function() {
     function onSubError(name) {
         return function(err) {
@@ -172,16 +271,23 @@ whenAuthReady(function() {
         allMileageTotals = {};
         snapshot.docs.forEach(function(doc) { allMileageTotals[doc.id] = doc.data(); });
         renderMileageList();
+        renderRewardList(); // 마일리지 총합이 바뀌면 리워드 "교환 가능" 여부도 다시 계산
     }, onSubError("마일리지"));
 
     db.collection("mileage_log").orderBy("createdAt", "desc").limit(30).onSnapshot(function(snapshot) {
         allLogs = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderLogList();
     }, onSubError("마일리지 내역"));
+
+    db.collection("rewards").orderBy("createdAt").onSnapshot(function(snapshot) {
+        allRewards = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderRewardList();
+    }, onSubError("리워드 상점"));
 });
 
 // ✨ 누군가 아바타를 바꾸면 이름 옆 이모지도 바로 갱신
 document.addEventListener("avatars-updated", function() {
     renderMileageList();
     renderLogList();
+    renderRewardList();
 });
