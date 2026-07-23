@@ -49,13 +49,29 @@ function getHoliday(y, m, d) { // m: 0-11
 }
 
 // ✨ 여러 날짜 일정 지원: 이 날짜가 일정 기간(date~endDate) 안에 포함되는지
+// "매년 반복"(생일 등)은 연도 상관없이 월-일만 같으면 해당하는 걸로 침
+function monthDayOf(dateStr) { return dateStr.slice(5); }
+
 function eventCoversDate(ev, key) {
+    if (ev.recurYearly) return monthDayOf(key) === monthDayOf(ev.date);
     const end = ev.endDate || ev.date;
     return key >= ev.date && key <= end;
 }
 
-// ✨ 여러 날짜 일정이면 "7월 1일 ~ 7월 10일" 형태로 표시
-function formatEventDateLabel(ev) {
+// 반복 일정의 "다음 번" 날짜 계산 (올해 날짜가 이미 지났으면 내년으로)
+function nextOccurrenceKey(ev, todayKey) {
+    if (!ev.recurYearly) return ev.date;
+    const todayYear = Number(todayKey.slice(0, 4));
+    const md = monthDayOf(ev.date);
+    const thisYearKey = `${todayYear}-${md}`;
+    return thisYearKey >= todayKey ? thisYearKey : `${todayYear + 1}-${md}`;
+}
+
+// ✨ 여러 날짜 일정이면 "7월 1일 ~ 7월 10일" 형태로 표시, 매년 반복이면 "(매년 반복)" 표시
+function formatEventDateLabel(ev, occurrenceKey) {
+    if (ev.recurYearly) {
+        return `${formatDateShort(occurrenceKey || ev.date)} (매년 반복)`;
+    }
     if (ev.endDate && ev.endDate !== ev.date) {
         return `${formatDateShort(ev.date)} ~ ${formatDateShort(ev.endDate)}`;
     }
@@ -120,8 +136,10 @@ function renderCalendar() {
 function renderUpcoming() {
     const todayKey = dateKey(today.getFullYear(), today.getMonth(), today.getDate());
     const upcoming = allEvents
-        .filter(function(ev) { return (ev.endDate || ev.date) >= todayKey; })
-        .sort(function(a, b) { return a.date.localeCompare(b.date); })
+        // 반복 일정은 항상 후보(다음 번 날짜로 계산), 아니면 기존처럼 기간이 안 지난 것만
+        .filter(function(ev) { return ev.recurYearly || (ev.endDate || ev.date) >= todayKey; })
+        .map(function(ev) { return Object.assign({}, ev, { _occursOn: nextOccurrenceKey(ev, todayKey) }); })
+        .sort(function(a, b) { return a._occursOn.localeCompare(b._occursOn); })
         .slice(0, 8);
 
     const listEl = document.getElementById("upcoming-list");
@@ -134,7 +152,7 @@ function renderUpcoming() {
         const item = document.createElement("div");
         item.className = "event-item";
         item.innerHTML = `
-            <div class="event-item-date">${formatEventDateLabel(ev)}</div>
+            <div class="event-item-date">${formatEventDateLabel(ev, ev._occursOn)}</div>
             <div class="event-item-body">
                 <h4>${escapeHtml(ev.title)}${ev.time ? " · " + ev.time : ""}</h4>
                 <p>${escapeHtml(ev.author)}${ev.memo ? " · " + escapeHtml(ev.memo) : ""}</p>
@@ -221,6 +239,7 @@ eventForm.addEventListener("submit", function(e) {
         title: document.getElementById("event-title").value.trim(),
         time: document.getElementById("event-time").value,
         memo: document.getElementById("event-memo").value.trim(),
+        recurYearly: document.getElementById("event-recur-yearly").checked,
         author: currentUserName(),
         ownerUid: auth.currentUser.uid,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()

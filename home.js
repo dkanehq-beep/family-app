@@ -117,9 +117,21 @@ whenAuthReady(function() {
 });
 
 // ✨ 오늘 캘린더 일정(생일 등)이 있으면 축하 메시지 남기는 공간을 보여줌
+// "매년 반복"은 연도 상관없이 월-일만 같으면 해당하는 걸로 침 (calendar.js와 동일한 기준)
+function monthDayOf(dateStr) { return dateStr.slice(5); }
+
 function eventCoversDate(ev, key) {
+    if (ev.recurYearly) return monthDayOf(key) === monthDayOf(ev.date);
     const end = ev.endDate || ev.date;
     return key >= ev.date && key <= end;
+}
+
+function nextOccurrenceKey(ev, todayKey) {
+    if (!ev.recurYearly) return ev.date;
+    const todayYear = Number(todayKey.slice(0, 4));
+    const md = monthDayOf(ev.date);
+    const thisYearKey = `${todayYear}-${md}`;
+    return thisYearKey >= todayKey ? thisYearKey : `${todayYear + 1}-${md}`;
 }
 
 let allEventsForWish = [];
@@ -185,13 +197,14 @@ whenAuthReady(function() {
         todayEvents = allEventsForWish.filter(function(ev) { return eventCoversDate(ev, todayDateKey()); });
         renderEventWishes();
 
-        // 다가오는 일정 중 가장 가까운 것 하나를 홈 대시보드 카드에 보여줌
+        // 다가오는 일정 중 가장 가까운 것 하나를 홈 대시보드 카드에 보여줌 (반복 일정은 다음 번 날짜로 계산)
         const todayKey = todayDateKey();
         const upcoming = allEventsForWish
-            .filter(function(ev) { return (ev.endDate || ev.date) >= todayKey; })
-            .sort(function(a, b) { return a.date.localeCompare(b.date); });
+            .filter(function(ev) { return ev.recurYearly || (ev.endDate || ev.date) >= todayKey; })
+            .map(function(ev) { return Object.assign({}, ev, { _occursOn: nextOccurrenceKey(ev, todayKey) }); })
+            .sort(function(a, b) { return a._occursOn.localeCompare(b._occursOn); });
         if (upcoming.length > 0) {
-            const diff = daysUntilDate(upcoming[0].date);
+            const diff = daysUntilDate(upcoming[0]._occursOn);
             glanceUpcomingEvent = { title: upcoming[0].title, dday: diff === 0 ? "오늘" : `D-${diff}` };
         } else {
             glanceUpcomingEvent = null;
