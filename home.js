@@ -29,7 +29,7 @@ function todaysQuestion() { return DAILY_QUESTIONS[dayOfYear(new Date()) % DAILY
 
 let todayCheckins = [];
 let checkinStreak = 0;
-let recentCheckins = [];  // 최근 200건 - 개인별 체크인 횟수 집계(배지)에도 재사용
+let recentCheckins = [];  // 최근 200건 - 스트릭 계산 + 최근 활동 피드에 재사용
 
 function myTodayCheckin() {
     const uid = auth.currentUser && auth.currentUser.uid;
@@ -111,12 +111,11 @@ whenAuthReady(function() {
         todayCheckins = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderCheckinWidget();
     });
-    // 최근 체크인 기록은 스트릭 계산 + 배지 계산(개인별 체크인 횟수) 둘 다에 재사용
+    // 최근 체크인 기록은 스트릭 계산 + 최근 활동 피드에 재사용
     db.collection("checkins").orderBy("dateKey", "desc").limit(200).onSnapshot(function(snapshot) {
         recentCheckins = snapshot.docs.map(function(doc) { return doc.data(); });
         checkinStreak = computeStreak(recentCheckins.map(function(c) { return c.dateKey; }));
         renderStreak();
-        renderBadges();
         renderActivityFeed();
     });
 });
@@ -294,41 +293,6 @@ function renderMemories() {
     `;
 }
 
-// ✨ 가족 배지 - 마일리지/체크인/게시글/여행/할일 등록 실적으로 자동 잠금 해제 (새 컬렉션 없이 기존 데이터로 계산)
-const BADGE_DEFS = [
-    { icon: "🌱", name: "첫 체크인", check: function(uid) { return recentCheckins.filter(function(c) { return c.ownerUid === uid; }).length >= 1; } },
-    { icon: "🔥", name: "체크인 마스터", check: function(uid) { return recentCheckins.filter(function(c) { return c.ownerUid === uid; }).length >= 10; } },
-    { icon: "✍️", name: "인기 작가", check: function(uid) { return memoryPosts.filter(function(p) { return p.ownerUid === uid; }).length >= 5; } },
-    { icon: "✈️", name: "여행가", check: function(uid) { return memoryTrips.filter(function(t) { return t.ownerUid === uid; }).length >= 1; } },
-    { icon: "📝", name: "정리왕", check: function(uid) { return allTodos.filter(function(t) { return t.ownerUid === uid; }).length >= 5; } }
-];
-
-function renderBadges() {
-    const wrap = document.getElementById("badge-section");
-    if (!wrap) return;
-    const roster = familyRoster(false);
-    if (roster.length === 0) { wrap.innerHTML = ""; return; }
-
-    wrap.innerHTML = `
-        <div class="section-header"><h3 class="section-label">가족 배지</h3></div>
-        <div class="badge-grid">
-            ${roster.map(function(p) {
-                return `
-                    <div class="badge-person-card">
-                        <span class="badge-person-name">${avatarPrefix(p.id)}${escapeHtml(p.name)}</span>
-                        <div class="badge-icons">
-                            ${BADGE_DEFS.map(function(b) {
-                                const got = b.check(p.id);
-                                return `<span class="badge-icon${got ? "" : " locked"}" title="${escapeHtml(b.name)}">${b.icon}</span>`;
-                            }).join("")}
-                        </div>
-                    </div>
-                `;
-            }).join("")}
-        </div>
-    `;
-}
-
 // ✨ 최근 활동 피드 - 이미 홈에서 불러온 데이터(체크인/게시글/편지/할일)를 시간순으로 모아서 보여줌
 // (새로 구독하는 게 아니라 다른 기능들이 이미 불러온 데이터를 재사용)
 function renderActivityFeed() {
@@ -435,21 +399,19 @@ whenAuthReady(function() {
         computeMileageTop();
         renderGlanceGrid();
     });
-    // "오늘의 추억" 매칭 + 배지(인기 작가) 계산에도 재사용하기 위해 최근 글을 넉넉히 가져옴
+    // "오늘의 추억" 매칭 + 최근 활동 피드에도 재사용하기 위해 최근 글을 넉넉히 가져옴
     db.collection("posts").orderBy("createdAt", "desc").limit(300).onSnapshot(function(snapshot) {
         const posts = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         glanceLatestPost = posts.length > 0 ? posts[0] : null;
         memoryPosts = posts;
         renderGlanceGrid();
         renderMemories();
-        renderBadges();
         renderActivityFeed();
     });
 
     db.collection("trips").onSnapshot(function(snapshot) {
         memoryTrips = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderMemories();
-        renderBadges();
     });
 });
 
@@ -982,13 +944,11 @@ todoForm.addEventListener("submit", function(e) {
 });
 
 renderTodoList();
-renderBadges();
 renderActivityFeed();
 whenAuthReady(function() {
     db.collection("todos").orderBy("createdAt", "desc").onSnapshot(function(snapshot) {
         allTodos = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderTodoList();
-        renderBadges();
         renderActivityFeed();
     }, function(err) { console.error("할일 구독 실패:", err.message); });
 });
@@ -1084,7 +1044,6 @@ document.addEventListener("avatars-updated", function() {
     renderEventWishes();
     renderGlanceGrid();
     renderLetterList();
-    renderBadges();
     renderWishlist();
     renderActivityFeed();
 });
