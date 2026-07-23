@@ -606,6 +606,29 @@ a { color: inherit; }
 }
 .section-add-btn:hover { background: rgba(255, 122, 89, 0.18); }
 .section-add-btn:active { transform: scale(0.95); }
+
+/* 섹션 헤더에 추가 버튼 + 접기/펼치기 버튼을 같이 둘 때 하나로 묶어서 정렬 */
+.section-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.section-toggle-btn {
+    background: var(--primary-light);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: var(--primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+.section-toggle-btn svg { width: 14px; height: 14px; transition: transform 0.25s; }
+.section-toggle-btn.open svg { transform: rotate(180deg); }
+.section-toggle-btn:hover { background: rgba(255, 122, 89, 0.18); }
+.section-toggle-btn:active { transform: scale(0.9); }
+.collapsible-body { animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
 .show-more-btn {
     display: block;
     width: 100%;

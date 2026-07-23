@@ -51,8 +51,13 @@
     <div class="section-block">
         <div class="section-header">
             <h3 class="section-label">최근 활동</h3>
+            <button class="section-toggle-btn" data-target="activity-feed-wrap" aria-label="펼치기/접기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
         </div>
-        <div id="activity-feed"></div>
+        <div class="collapsible-body" id="activity-feed-wrap" style="display:none;">
+            <div id="activity-feed"></div>
+        </div>
     </div>
 
     <div class="section-block" id="event-wish-section" style="display:none;"></div>
@@ -87,25 +92,46 @@
     <div class="section-block">
         <div class="section-header">
             <h3 class="section-label">가족 편지함</h3>
-            <button class="section-add-btn" id="letter-add-btn">+ 편지 쓰기</button>
+            <div class="section-header-actions">
+                <button class="section-add-btn" id="letter-add-btn">+ 편지 쓰기</button>
+                <button class="section-toggle-btn" data-target="letter-wrap" aria-label="펼치기/접기">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+            </div>
         </div>
-        <div id="letter-list"></div>
+        <div class="collapsible-body" id="letter-wrap" style="display:none;">
+            <div id="letter-list"></div>
+        </div>
     </div>
 
     <div class="section-block">
         <div class="section-header">
             <h3 class="section-label">장보기 · 할일</h3>
-            <button class="section-add-btn" id="todo-add-btn">+ 추가</button>
+            <div class="section-header-actions">
+                <button class="section-add-btn" id="todo-add-btn">+ 추가</button>
+                <button class="section-toggle-btn" data-target="todo-wrap" aria-label="펼치기/접기">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+            </div>
         </div>
-        <div id="todo-list"></div>
+        <div class="collapsible-body" id="todo-wrap" style="display:none;">
+            <div id="todo-list"></div>
+        </div>
     </div>
 
     <div class="section-block">
         <div class="section-header">
             <h3 class="section-label">위시리스트</h3>
-            <button class="section-add-btn" id="wishlist-add-btn">+ 추가</button>
+            <div class="section-header-actions">
+                <button class="section-add-btn" id="wishlist-add-btn">+ 추가</button>
+                <button class="section-toggle-btn" data-target="wishlist-wrap" aria-label="펼치기/접기">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+            </div>
         </div>
-        <div id="wishlist-section"></div>
+        <div class="collapsible-body" id="wishlist-wrap" style="display:none;">
+            <div id="wishlist-section"></div>
+        </div>
     </div>
 
     <div class="section-block">

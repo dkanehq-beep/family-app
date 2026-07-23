@@ -305,3 +305,15 @@ document.querySelectorAll(".tabbar a, .topbar-nav a").forEach(function(link) {
         setTimeout(function() { window.location.href = href; }, 180);
     });
 });
+
+// ✨ 섹션 접기/펼치기 - data-target에 적힌 id를 가진 요소를 보이거나 숨김
+// (홈 화면이 너무 길어져서, 자주 안 쓰는 섹션은 기본 접힌 채로 시작하게 하는 용도)
+document.querySelectorAll(".section-toggle-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+        const target = document.getElementById(btn.dataset.target);
+        if (!target) return;
+        const willOpen = target.style.display === "none";
+        target.style.display = willOpen ? "block" : "none";
+        btn.classList.toggle("open", willOpen);
+    });
+});
