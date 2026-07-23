@@ -155,6 +155,14 @@ service cloud.firestore {
       allow delete: if isOwner(resource.data);
     }
 
+    // 위시리스트 (선물했는지 체크는 가족 누구나, 삭제는 작성자만)
+    match /wishlist_items/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn();
+      allow delete: if isOwner(resource.data);
+    }
+
     // 그 외 컬렉션은 기본 차단
     match /{document=**} {
       allow read, write: if false;

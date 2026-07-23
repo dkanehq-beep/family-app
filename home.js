@@ -29,6 +29,7 @@ function todaysQuestion() { return DAILY_QUESTIONS[dayOfYear(new Date()) % DAILY
 
 let todayCheckins = [];
 let checkinStreak = 0;
+let recentCheckins = [];  // 최근 200건 - 개인별 체크인 횟수 집계(배지)에도 재사용
 
 function myTodayCheckin() {
     const uid = auth.currentUser && auth.currentUser.uid;
@@ -110,9 +111,13 @@ whenAuthReady(function() {
         todayCheckins = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderCheckinWidget();
     });
+    // 최근 체크인 기록은 스트릭 계산 + 배지 계산(개인별 체크인 횟수) 둘 다에 재사용
     db.collection("checkins").orderBy("dateKey", "desc").limit(200).onSnapshot(function(snapshot) {
-        checkinStreak = computeStreak(snapshot.docs.map(function(doc) { return doc.data().dateKey; }));
+        recentCheckins = snapshot.docs.map(function(doc) { return doc.data(); });
+        checkinStreak = computeStreak(recentCheckins.map(function(c) { return c.dateKey; }));
         renderStreak();
+        renderBadges();
+        renderActivityFeed();
     });
 });
 
@@ -289,6 +294,83 @@ function renderMemories() {
     `;
 }
 
+// ✨ 가족 배지 - 마일리지/체크인/게시글/여행/할일 등록 실적으로 자동 잠금 해제 (새 컬렉션 없이 기존 데이터로 계산)
+const BADGE_DEFS = [
+    { icon: "🌱", name: "첫 체크인", check: function(uid) { return recentCheckins.filter(function(c) { return c.ownerUid === uid; }).length >= 1; } },
+    { icon: "🔥", name: "체크인 마스터", check: function(uid) { return recentCheckins.filter(function(c) { return c.ownerUid === uid; }).length >= 10; } },
+    { icon: "✍️", name: "인기 작가", check: function(uid) { return memoryPosts.filter(function(p) { return p.ownerUid === uid; }).length >= 5; } },
+    { icon: "✈️", name: "여행가", check: function(uid) { return memoryTrips.filter(function(t) { return t.ownerUid === uid; }).length >= 1; } },
+    { icon: "📝", name: "정리왕", check: function(uid) { return allTodos.filter(function(t) { return t.ownerUid === uid; }).length >= 5; } }
+];
+
+function renderBadges() {
+    const wrap = document.getElementById("badge-section");
+    if (!wrap) return;
+    const roster = familyRoster(false);
+    if (roster.length === 0) { wrap.innerHTML = ""; return; }
+
+    wrap.innerHTML = `
+        <div class="section-header"><h3 class="section-label">가족 배지</h3></div>
+        <div class="badge-grid">
+            ${roster.map(function(p) {
+                return `
+                    <div class="badge-person-card">
+                        <span class="badge-person-name">${avatarPrefix(p.id)}${escapeHtml(p.name)}</span>
+                        <div class="badge-icons">
+                            ${BADGE_DEFS.map(function(b) {
+                                const got = b.check(p.id);
+                                return `<span class="badge-icon${got ? "" : " locked"}" title="${escapeHtml(b.name)}">${b.icon}</span>`;
+                            }).join("")}
+                        </div>
+                    </div>
+                `;
+            }).join("")}
+        </div>
+    `;
+}
+
+// ✨ 최근 활동 피드 - 이미 홈에서 불러온 데이터(체크인/게시글/편지/할일)를 시간순으로 모아서 보여줌
+// (새로 구독하는 게 아니라 다른 기능들이 이미 불러온 데이터를 재사용)
+function renderActivityFeed() {
+    const wrap = document.getElementById("activity-feed");
+    if (!wrap) return;
+
+    const items = [];
+    recentCheckins.forEach(function(c) {
+        items.push({ ts: c.createdAt, icon: "💬", text: `${c.name}님이 오늘의 질문에 답했어요` });
+    });
+    memoryPosts.forEach(function(p) {
+        items.push({ ts: p.createdAt, icon: "✏️", text: `${p.author}님이 글을 남겼어요: ${p.title}` });
+    });
+    myLetters.forEach(function(l) {
+        items.push({ ts: l.createdAt, icon: "💌", text: `${l.author}님이 나에게 편지를 보냈어요` });
+    });
+    allTodos.forEach(function(t) {
+        items.push({ ts: t.createdAt, icon: "🛒", text: `"${t.title}" 항목이 추가됐어요` });
+    });
+
+    const sorted = items
+        .filter(function(it) { return it.ts && it.ts.toMillis; })
+        .sort(function(a, b) { return b.ts.toMillis() - a.ts.toMillis(); })
+        .slice(0, 15);
+
+    if (sorted.length === 0) {
+        wrap.innerHTML = '<p class="empty-hint">아직 활동이 없어요.</p>';
+        return;
+    }
+    wrap.innerHTML = sorted.map(function(it) {
+        return `
+            <div class="activity-item">
+                <span class="activity-icon">${it.icon}</span>
+                <div class="activity-body">
+                    <p>${escapeHtml(it.text)}</p>
+                    <span class="activity-time">${formatAnnounceDate(it.ts)}</span>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
 function computeMileageTop() {
     const merged = glanceProfiles
         .map(function(p) { return { id: p.id, name: p.name || "가족", total: glanceMileageTotals[p.id] || 0 }; })
@@ -353,18 +435,21 @@ whenAuthReady(function() {
         computeMileageTop();
         renderGlanceGrid();
     });
-    // "오늘의 추억" 매칭에도 재사용하기 위해 최근 글을 넉넉히 가져옴 (가족 게시판 규모면 충분)
+    // "오늘의 추억" 매칭 + 배지(인기 작가) 계산에도 재사용하기 위해 최근 글을 넉넉히 가져옴
     db.collection("posts").orderBy("createdAt", "desc").limit(300).onSnapshot(function(snapshot) {
         const posts = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         glanceLatestPost = posts.length > 0 ? posts[0] : null;
         memoryPosts = posts;
         renderGlanceGrid();
         renderMemories();
+        renderBadges();
+        renderActivityFeed();
     });
 
     db.collection("trips").onSnapshot(function(snapshot) {
         memoryTrips = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderMemories();
+        renderBadges();
     });
 });
 
@@ -570,18 +655,77 @@ function watchPollVotes(pollId) {
 
 renderPollWidget();
 whenAuthReady(function() {
-    db.collection("polls").orderBy("createdAt", "desc").limit(1).onSnapshot(function(snapshot) {
-        if (snapshot.empty) {
+    // 최신 20개를 가져와서, 맨 앞(0번)은 진행 중인 투표로 쓰고 나머지는 "지난 투표" 기록으로 재사용
+    db.collection("polls").orderBy("createdAt", "desc").limit(20).onSnapshot(function(snapshot) {
+        allPolls = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        if (allPolls.length === 0) {
             currentPoll = null;
             currentPollVotes = [];
             renderPollWidget();
+            renderPollHistoryToggle();
             return;
         }
-        const doc = snapshot.docs[0];
-        currentPoll = Object.assign({ id: doc.id }, doc.data());
+        currentPoll = allPolls[0];
         watchPollVotes(currentPoll.id);
         renderPollWidget();
+        renderPollHistoryToggle();
     });
+});
+
+// ✨ 지난 투표 기록 - 진행 중인 투표(allPolls[0])를 뺀 나머지를 눌러서 펼쳐봄
+let allPolls = [];
+let pollHistoryVotes = {};  // pollId -> [{optionIndex, ...}]
+let pollHistoryExpanded = false;
+let pollHistoryLoaded = false;
+
+function renderPollHistoryToggle() {
+    const btn = document.getElementById("poll-history-toggle");
+    if (!btn) return;
+    const past = allPolls.slice(1);
+    if (past.length === 0) { btn.style.display = "none"; return; }
+    btn.style.display = "block";
+    btn.textContent = pollHistoryExpanded ? "지난 투표 접기" : `지난 투표 보기 (${past.length})`;
+}
+
+function renderPollHistory() {
+    const wrap = document.getElementById("poll-history-list");
+    if (!wrap) return;
+    if (!pollHistoryExpanded) { wrap.innerHTML = ""; return; }
+    const past = allPolls.slice(1);
+    wrap.innerHTML = past.map(function(p) {
+        const votes = pollHistoryVotes[p.id] || [];
+        const total = votes.length;
+        const optionsHtml = (p.options || []).map(function(opt, i) {
+            const count = votes.filter(function(v) { return v.optionIndex === i; }).length;
+            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+            return `<div class="poll-history-option"><span>${escapeHtml(opt)}</span><span>${count}표 (${pct}%)</span></div>`;
+        }).join("");
+        return `
+            <div class="poll-history-card">
+                <p class="poll-history-question">${escapeHtml(p.question)}</p>
+                <div class="poll-history-options">${optionsHtml}</div>
+                <p class="poll-history-meta">${avatarPrefix(p.ownerUid)}${escapeHtml(p.author || "")} · 총 ${total}표</p>
+            </div>
+        `;
+    }).join("");
+}
+
+document.getElementById("poll-history-toggle").addEventListener("click", function() {
+    pollHistoryExpanded = !pollHistoryExpanded;
+    renderPollHistoryToggle();
+    if (pollHistoryExpanded && !pollHistoryLoaded) {
+        pollHistoryLoaded = true;
+        const past = allPolls.slice(1);
+        Promise.all(past.map(function(p) {
+            return db.collection("polls").doc(p.id).collection("votes").get().then(function(snap) {
+                pollHistoryVotes[p.id] = snap.docs.map(function(d) { return d.data(); });
+            });
+        })).then(renderPollHistory).catch(function(err) {
+            showToast("지난 투표를 불러오지 못했어요: " + err.message);
+        });
+    } else {
+        renderPollHistory();
+    }
 });
 
 const pollModal = document.getElementById("poll-modal");
@@ -760,6 +904,7 @@ whenAuthReady(function() {
                 return bt - at;
             });
         renderLetterList();
+        renderActivityFeed();
     }, function(err) {
         console.error("편지함 구독 실패:", err.message);
     });
@@ -837,11 +982,98 @@ todoForm.addEventListener("submit", function(e) {
 });
 
 renderTodoList();
+renderBadges();
+renderActivityFeed();
 whenAuthReady(function() {
     db.collection("todos").orderBy("createdAt", "desc").onSnapshot(function(snapshot) {
         allTodos = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
         renderTodoList();
+        renderBadges();
+        renderActivityFeed();
     }, function(err) { console.error("할일 구독 실패:", err.message); });
+});
+
+// ✨ 위시리스트 - 사람별로 묶어서 보여주고, 선물했으면 "완료" 체크로 표시(중복 선물 방지)
+let allWishlist = [];
+const wishlistModal = document.getElementById("wishlist-modal");
+const wishlistForm = document.getElementById("wishlist-form");
+
+function renderWishlist() {
+    const wrap = document.getElementById("wishlist-section");
+    if (!wrap) return;
+    if (allWishlist.length === 0) {
+        wrap.innerHTML = '<p class="empty-hint">아직 위시리스트가 없어요. 갖고 싶은 걸 적어보세요!</p>';
+        return;
+    }
+    const grouped = {};
+    allWishlist.forEach(function(w) {
+        if (!grouped[w.ownerUid]) grouped[w.ownerUid] = { name: w.author, items: [] };
+        grouped[w.ownerUid].items.push(w);
+    });
+    wrap.innerHTML = Object.keys(grouped).map(function(uid) {
+        const g = grouped[uid];
+        return `
+            <div class="wishlist-person">
+                <span class="wishlist-person-name">${avatarPrefix(uid)}${escapeHtml(g.name)}</span>
+                <div class="wishlist-items">
+                    ${g.items.map(function(w) {
+                        return `
+                            <div class="wishlist-row${w.fulfilled ? " fulfilled" : ""}" data-id="${w.id}">
+                                <label class="toggle-switch sm wishlist-toggle">
+                                    <input type="checkbox" class="wishlist-toggle-input" data-id="${w.id}" ${w.fulfilled ? "checked" : ""}>
+                                    <span class="toggle-track"></span>
+                                </label>
+                                <span class="wishlist-title">${escapeHtml(w.title)}</span>
+                                ${isOwner(w) ? `<button type="button" class="wishlist-del" data-id="${w.id}">✕</button>` : ""}
+                            </div>
+                        `;
+                    }).join("")}
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    wrap.querySelectorAll(".wishlist-toggle-input").forEach(function(input) {
+        input.addEventListener("change", function() {
+            db.collection("wishlist_items").doc(input.dataset.id).update({ fulfilled: input.checked });
+        });
+    });
+    wrap.querySelectorAll(".wishlist-del").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            db.collection("wishlist_items").doc(btn.dataset.id).delete();
+        });
+    });
+}
+
+document.getElementById("wishlist-add-btn").addEventListener("click", function() { wishlistModal.classList.add("open"); });
+document.getElementById("wishlist-modal-close").addEventListener("click", function() { wishlistModal.classList.remove("open"); });
+document.getElementById("wishlist-cancel-btn").addEventListener("click", function() { wishlistModal.classList.remove("open"); });
+wishlistModal.addEventListener("click", function(e) { if (e.target === wishlistModal) wishlistModal.classList.remove("open"); });
+
+wishlistForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const title = document.getElementById("wishlist-title").value.trim();
+    db.collection("wishlist_items").add({
+        title: title,
+        fulfilled: false,
+        author: currentUserName(),
+        ownerUid: auth.currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+        showToast("위시리스트에 추가했어요");
+        wishlistModal.classList.remove("open");
+        wishlistForm.reset();
+    }).catch(function(err) {
+        showToast("추가에 실패했어요: " + err.message);
+    });
+});
+
+renderWishlist();
+whenAuthReady(function() {
+    db.collection("wishlist_items").orderBy("createdAt", "desc").onSnapshot(function(snapshot) {
+        allWishlist = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderWishlist();
+    }, function(err) { console.error("위시리스트 구독 실패:", err.message); });
 });
 
 // ✨ 누군가 아바타를 바꾸면 이름 옆 이모지도 바로 갱신
@@ -852,6 +1084,9 @@ document.addEventListener("avatars-updated", function() {
     renderEventWishes();
     renderGlanceGrid();
     renderLetterList();
+    renderBadges();
+    renderWishlist();
+    renderActivityFeed();
 });
 
 // ✨ 홈 화면을 열어봤으니 지금까지의 공지는 다 본 것으로 처리 (탭바 배지 해제용)

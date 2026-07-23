@@ -48,6 +48,13 @@
         <div id="today-summary-list"></div>
     </div>
 
+    <div class="section-block">
+        <div class="section-header">
+            <h3 class="section-label">최근 활동</h3>
+        </div>
+        <div id="activity-feed"></div>
+    </div>
+
     <div class="section-block" id="event-wish-section" style="display:none;"></div>
 
     <div class="section-block" id="memory-section" style="display:none;"></div>
@@ -58,6 +65,8 @@
         </div>
         <div class="glance-grid" id="glance-grid"></div>
     </div>
+
+    <div class="section-block" id="badge-section"></div>
 
     <div class="section-block">
         <div class="section-header">
@@ -73,6 +82,8 @@
             <button class="section-add-btn" id="poll-add-btn">+ 새 투표</button>
         </div>
         <div id="poll-widget"></div>
+        <button class="show-more-btn" id="poll-history-toggle" style="display:none;"></button>
+        <div id="poll-history-list"></div>
     </div>
 
     <div class="section-block">
@@ -89,6 +100,14 @@
             <button class="section-add-btn" id="todo-add-btn">+ 추가</button>
         </div>
         <div id="todo-list"></div>
+    </div>
+
+    <div class="section-block">
+        <div class="section-header">
+            <h3 class="section-label">위시리스트</h3>
+            <button class="section-add-btn" id="wishlist-add-btn">+ 추가</button>
+        </div>
+        <div id="wishlist-section"></div>
     </div>
 
     <div class="section-block">
@@ -214,6 +233,24 @@
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" id="todo-cancel-btn">취소</button>
+                <button type="submit" class="btn-primary">추가하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 위시리스트 추가 모달 -->
+<div class="modal-overlay" id="wishlist-modal">
+    <div class="modal-box">
+        <button class="modal-close-x" id="wishlist-modal-close">✕</button>
+        <h3>위시리스트에 추가</h3>
+        <form id="wishlist-form">
+            <div class="form-group">
+                <label>갖고 싶은 것 · 하고 싶은 것</label>
+                <input type="text" id="wishlist-title" placeholder="예: 무선 이어폰, 캠핑 가기" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="wishlist-cancel-btn">취소</button>
                 <button type="submit" class="btn-primary">추가하기</button>
             </div>
         </form>
