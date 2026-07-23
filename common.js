@@ -48,9 +48,11 @@ function isOwner(item) {
     return !!(item && auth.currentUser && item.ownerUid === auth.currentUser.uid);
 }
 
-// ✨ 프로필 이모지 아바타 (모든 페이지에서 공통으로 구독, uid로 조회)
+// ✨ 프로필 이모지 아바타 + 가족 명단 (모든 페이지에서 공통으로 구독)
 // 이름 옆에 아바타를 붙이고 싶은 곳에서는 avatarPrefix(uid)를 이름 앞에 붙이면 됨
+// 가족 중 한 명을 골라야 하는 화면(편지함 등)에서는 familyRoster()를 쓰면 됨
 let _profileAvatars = {};  // { uid: "🦊" } 형태
+let _familyRoster = [];    // [{ id, name }] 가입한 가족 전체 명단
 const AVATAR_CHOICES = ["🦊", "🐻", "🐰", "🐱", "🐶", "🐼", "🦁", "🐯", "🐨", "🐷", "🐮", "🐸", "🦄", "🐙", "🌟", "🌈"];
 
 function avatarPrefix(uid) {
@@ -58,12 +60,24 @@ function avatarPrefix(uid) {
     return emoji ? emoji + " " : "";
 }
 
+// 나를 뺀 가족 명단이 필요하면 familyRoster(true)로 호출
+function familyRoster(excludeMe) {
+    const myUid = auth.currentUser && auth.currentUser.uid;
+    return _familyRoster.filter(function(p) { return !excludeMe || p.id !== myUid; });
+}
+
 whenAuthReady(function() {
     db.collection("profiles").onSnapshot(function(snapshot) {
-        const next = {};
-        snapshot.docs.forEach(function(doc) { next[doc.id] = (doc.data().avatar || ""); });
-        _profileAvatars = next;
-        // 아바타가 바뀌면 화면에 다시 그려야 하는 페이지들이 각자 반영할 수 있도록 신호를 보냄
+        const nextAvatars = {};
+        const nextRoster = [];
+        snapshot.docs.forEach(function(doc) {
+            const data = doc.data();
+            nextAvatars[doc.id] = (data.avatar || "");
+            nextRoster.push({ id: doc.id, name: data.name || "가족" });
+        });
+        _profileAvatars = nextAvatars;
+        _familyRoster = nextRoster;
+        // 아바타/명단이 바뀌면 화면에 다시 그려야 하는 페이지들이 각자 반영할 수 있도록 신호를 보냄
         document.dispatchEvent(new CustomEvent("avatars-updated"));
     });
 });

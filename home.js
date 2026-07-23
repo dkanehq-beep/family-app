@@ -593,6 +593,97 @@ whenAuthReady(function() {
     });
 });
 
+// ✨ 가족 편지함 - 게시판처럼 전체공개가 아니라, 받는 사람+보낸 사람만 볼 수 있음
+let myLetters = [];
+const letterModal = document.getElementById("letter-modal");
+const letterForm = document.getElementById("letter-form");
+
+function renderLetterList() {
+    const listEl = document.getElementById("letter-list");
+    if (!listEl) return;
+    if (myLetters.length === 0) {
+        listEl.innerHTML = '<p class="empty-hint">아직 받은 편지가 없어요. 가족에게 먼저 편지를 남겨보세요!</p>';
+        return;
+    }
+    listEl.innerHTML = myLetters.map(function(l) {
+        return `
+            <div class="letter-item" data-id="${l.id}">
+                <div class="letter-item-top">
+                    <span class="letter-from">${avatarPrefix(l.ownerUid)}${escapeHtml(l.author)}님이 보낸 편지</span>
+                    <span class="letter-date">${formatAnnounceDate(l.createdAt)}</span>
+                </div>
+                <p class="letter-text">${escapeHtml(l.text)}</p>
+                <button type="button" class="letter-del" data-id="${l.id}">삭제</button>
+            </div>
+        `;
+    }).join("");
+    listEl.querySelectorAll(".letter-del").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            if (!confirm("이 편지를 삭제할까요?")) return;
+            db.collection("letters").doc(btn.dataset.id).delete();
+        });
+    });
+}
+
+document.getElementById("letter-add-btn").addEventListener("click", function() {
+    const select = document.getElementById("letter-to");
+    const others = familyRoster(true);
+    if (others.length === 0) {
+        showToast("편지 보낼 다른 가족이 아직 없어요.");
+        return;
+    }
+    select.innerHTML = others.map(function(p) {
+        return `<option value="${p.id}" data-name="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`;
+    }).join("");
+    letterModal.classList.add("open");
+});
+document.getElementById("letter-modal-close").addEventListener("click", function() { letterModal.classList.remove("open"); });
+document.getElementById("letter-cancel-btn").addEventListener("click", function() { letterModal.classList.remove("open"); });
+letterModal.addEventListener("click", function(e) { if (e.target === letterModal) letterModal.classList.remove("open"); });
+
+letterForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const select = document.getElementById("letter-to");
+    const toUid = select.value;
+    const toName = select.selectedOptions[0] ? select.selectedOptions[0].dataset.name : "가족";
+    const text = document.getElementById("letter-text").value.trim();
+    const submitBtn = letterForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    db.collection("letters").add({
+        toUid: toUid,
+        toName: toName,
+        text: text,
+        author: currentUserName(),
+        ownerUid: auth.currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+        showToast(`${toName}님에게 편지를 보냈어요 💌`);
+        letterModal.classList.remove("open");
+        letterForm.reset();
+    }).catch(function(err) {
+        showToast("전송에 실패했어요: " + err.message);
+    }).finally(function() {
+        submitBtn.disabled = false;
+    });
+});
+
+renderLetterList();
+whenAuthReady(function() {
+    // where + orderBy를 같이 쓰면 복합 색인이 필요해지므로, 정렬은 받아온 뒤 코드에서 처리
+    db.collection("letters").where("toUid", "==", auth.currentUser.uid).onSnapshot(function(snapshot) {
+        myLetters = snapshot.docs
+            .map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); })
+            .sort(function(a, b) {
+                const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+                const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+                return bt - at;
+            });
+        renderLetterList();
+    }, function(err) {
+        console.error("편지함 구독 실패:", err.message);
+    });
+});
+
 // ✨ 누군가 아바타를 바꾸면 이름 옆 이모지도 바로 갱신
 document.addEventListener("avatars-updated", function() {
     renderAnnouncements();
@@ -600,6 +691,7 @@ document.addEventListener("avatars-updated", function() {
     renderCheckinWidget();
     renderEventWishes();
     renderGlanceGrid();
+    renderLetterList();
 });
 
 // ✨ 홈 화면을 열어봤으니 지금까지의 공지는 다 본 것으로 처리 (탭바 배지 해제용)

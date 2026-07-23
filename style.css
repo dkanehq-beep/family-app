@@ -1901,3 +1901,29 @@ body.dark-mode .cal-holiday-name { color: #f0846b; }
     box-shadow: 0 4px 12px rgba(255, 122, 89, 0.3);
 }
 .profile-toggle-btn:active { transform: scale(0.95); }
+
+/* ✨ 가족 편지함 - 받는 사람+보낸 사람만 보는 개인적인 메시지 */
+.letter-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-left: 3px solid var(--plum);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 10px;
+    transition: transform 0.3s cubic-bezier(0.25,1,0.5,1), box-shadow 0.3s;
+}
+.letter-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.letter-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.letter-from { font-size: 13px; font-weight: 700; color: var(--text-main); }
+.letter-date { font-size: 10.5px; color: var(--text-muted); flex-shrink: 0; white-space: nowrap; }
+.letter-text { font-size: 13px; color: var(--text-main); line-height: 1.7; white-space: pre-wrap; margin-bottom: 8px; }
+.letter-del { background: none; border: none; color: var(--text-muted); font-size: 11px; cursor: pointer; }
+.letter-del:hover { color: #b3492f; }
+.letter-del:active { opacity: 0.5; }

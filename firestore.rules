@@ -130,6 +130,15 @@ service cloud.firestore {
       allow write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // 가족 편지함 - 받는 사람과 보낸 사람만 읽을 수 있음 (게시판처럼 전체공개 아님)
+    match /letters/{id} {
+      allow read: if isSignedIn() &&
+        (resource.data.toUid == request.auth.uid || resource.data.ownerUid == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow delete: if isSignedIn() &&
+        (resource.data.toUid == request.auth.uid || resource.data.ownerUid == request.auth.uid);
+    }
+
     // 그 외 컬렉션은 기본 차단
     match /{document=**} {
       allow read, write: if false;
