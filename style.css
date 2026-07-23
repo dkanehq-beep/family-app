@@ -1927,3 +1927,55 @@ body.dark-mode .cal-holiday-name { color: #f0846b; }
 .letter-del { background: none; border: none; color: var(--text-muted); font-size: 11px; cursor: pointer; }
 .letter-del:hover { color: #b3492f; }
 .letter-del:active { opacity: 0.5; }
+
+/* ✨ 장보기 · 할일 리스트 - 숙제/준비물과 같은 뼈대 재사용 */
+.todo-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+}
+.todo-toggle { flex-shrink: 0; }
+.todo-text { flex: 1; font-size: 13px; color: var(--text-main); cursor: pointer; }
+.todo-item.done .todo-text { color: var(--text-muted); text-decoration: line-through; }
+.todo-del { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; flex-shrink: 0; }
+.todo-del:hover { color: #b3492f; }
+.todo-del:active { opacity: 0.5; }
+
+/* ✨ 오늘의 추억 - 몇 해 전 오늘의 여행/게시글을 다시 보여주는 카드 */
+.memory-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 10px;
+}
+.memory-card-img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
+.memory-card-body { min-width: 0; }
+.memory-card-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    color: #fff;
+    background: var(--plum);
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 6px;
+}
+.memory-card-body h4 { font-size: 13.5px; font-weight: 700; color: var(--text-main); font-family: 'Noto Serif KR', serif; }
+.memory-card-body p {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

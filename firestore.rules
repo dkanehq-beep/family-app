@@ -139,6 +139,14 @@ service cloud.firestore {
         (resource.data.toUid == request.auth.uid || resource.data.ownerUid == request.auth.uid);
     }
 
+    // 장보기 · 할일 공유 리스트 (완료 체크는 가족 누구나, 삭제는 작성자만)
+    match /todos/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn();
+      allow delete: if isOwner(resource.data);
+    }
+
     // 그 외 컬렉션은 기본 차단
     match /{document=**} {
       allow read, write: if false;

@@ -218,6 +218,64 @@ let glanceMileageTop = null;
 let glanceUpcomingEvent = null;
 let glanceLatestPost = null;
 
+// ✨ "오늘의 추억" - 여행 추억/게시판 글 중 몇 해 전 오늘(월-일이 같은 날)에 있었던 걸 자동으로 보여줌
+let memoryTrips = [];
+let memoryPosts = [];
+
+function monthDay(dateStr) { return dateStr.slice(5); } // "YYYY-MM-DD" -> "MM-DD"
+function monthDayFromTimestamp(ts) {
+    if (!ts || !ts.toDate) return null;
+    const d = ts.toDate();
+    return `${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function renderMemories() {
+    const wrap = document.getElementById("memory-section");
+    if (!wrap) return;
+    const todayMd = monthDay(todayDateKey());
+    const currentYear = new Date().getFullYear();
+
+    const tripItems = memoryTrips
+        .filter(function(t) { return t.date && monthDay(t.date) === todayMd && Number(t.date.slice(0, 4)) < currentYear; })
+        .map(function(t) {
+            return {
+                years: currentYear - Number(t.date.slice(0, 4)),
+                title: t.title, sub: t.location || "",
+                img: (t.photoUrls && t.photoUrls[0]) || null
+            };
+        });
+
+    const postItems = memoryPosts
+        .filter(function(p) { return p.createdAt && monthDayFromTimestamp(p.createdAt) === todayMd && p.createdAt.toDate().getFullYear() < currentYear; })
+        .map(function(p) {
+            return {
+                years: currentYear - p.createdAt.toDate().getFullYear(),
+                title: p.title, sub: (p.content || "").slice(0, 40),
+                img: null
+            };
+        });
+
+    const items = tripItems.concat(postItems);
+    if (items.length === 0) { wrap.style.display = "none"; wrap.innerHTML = ""; return; }
+
+    wrap.style.display = "block";
+    wrap.innerHTML = `
+        <div class="section-header"><h3 class="section-label">오늘의 추억</h3></div>
+        ${items.map(function(it) {
+            return `
+                <div class="memory-card">
+                    ${it.img ? `<img class="memory-card-img" src="${it.img}" alt="">` : ""}
+                    <div class="memory-card-body">
+                        <span class="memory-card-badge">${it.years}년 전 오늘</span>
+                        <h4>${escapeHtml(it.title)}</h4>
+                        ${it.sub ? `<p>${escapeHtml(it.sub)}</p>` : ""}
+                    </div>
+                </div>
+            `;
+        }).join("")}
+    `;
+}
+
 function computeMileageTop() {
     const merged = glanceProfiles
         .map(function(p) { return { id: p.id, name: p.name || "가족", total: glanceMileageTotals[p.id] || 0 }; })
@@ -269,6 +327,7 @@ function renderGlanceGrid() {
 }
 
 renderGlanceGrid();
+renderMemories();
 whenAuthReady(function() {
     db.collection("profiles").onSnapshot(function(snapshot) {
         glanceProfiles = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
@@ -281,9 +340,18 @@ whenAuthReady(function() {
         computeMileageTop();
         renderGlanceGrid();
     });
-    db.collection("posts").orderBy("createdAt", "desc").limit(1).onSnapshot(function(snapshot) {
-        glanceLatestPost = snapshot.empty ? null : Object.assign({ id: snapshot.docs[0].id }, snapshot.docs[0].data());
+    // "오늘의 추억" 매칭에도 재사용하기 위해 최근 글을 넉넉히 가져옴 (가족 게시판 규모면 충분)
+    db.collection("posts").orderBy("createdAt", "desc").limit(300).onSnapshot(function(snapshot) {
+        const posts = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        glanceLatestPost = posts.length > 0 ? posts[0] : null;
+        memoryPosts = posts;
         renderGlanceGrid();
+        renderMemories();
+    });
+
+    db.collection("trips").onSnapshot(function(snapshot) {
+        memoryTrips = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderMemories();
     });
 });
 
@@ -682,6 +750,85 @@ whenAuthReady(function() {
     }, function(err) {
         console.error("편지함 구독 실패:", err.message);
     });
+});
+
+// ✨ 장보기 · 할일 공유 리스트 (완료 체크에만 마일리지, 등록 자체는 안 걸음)
+let allTodos = [];
+const todoModal = document.getElementById("todo-modal");
+const todoForm = document.getElementById("todo-form");
+
+function renderTodoList() {
+    const listEl = document.getElementById("todo-list");
+    if (!listEl) return;
+    if (allTodos.length === 0) {
+        listEl.innerHTML = '<p class="empty-hint">아직 등록된 게 없어요. 장보기나 할일을 추가해보세요!</p>';
+        return;
+    }
+    listEl.innerHTML = allTodos.map(function(t) {
+        return `
+            <div class="todo-item${t.done ? " done" : ""}" data-id="${t.id}">
+                <label class="toggle-switch sm todo-toggle">
+                    <input type="checkbox" class="todo-toggle-input" data-id="${t.id}" ${t.done ? "checked" : ""}>
+                    <span class="toggle-track"></span>
+                </label>
+                <span class="todo-text">${escapeHtml(t.title)}</span>
+                ${isOwner(t) ? `<button type="button" class="todo-del" data-id="${t.id}">✕</button>` : ""}
+            </div>
+        `;
+    }).join("");
+
+    function toggleTodo(id, newDone) {
+        const t = allTodos.find(function(x) { return x.id === id; });
+        if (!t) return;
+        db.collection("todos").doc(id).update({ done: newDone });
+        if (newDone) awardMileage(5, "할일 완료: " + t.title);
+    }
+    listEl.querySelectorAll(".todo-toggle-input").forEach(function(input) {
+        input.addEventListener("change", function() { toggleTodo(input.dataset.id, input.checked); });
+    });
+    listEl.querySelectorAll(".todo-text").forEach(function(el) {
+        el.addEventListener("click", function() {
+            const item = el.closest(".todo-item");
+            const input = item.querySelector(".todo-toggle-input");
+            input.checked = !input.checked;
+            input.dispatchEvent(new Event("change"));
+        });
+    });
+    listEl.querySelectorAll(".todo-del").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            db.collection("todos").doc(btn.dataset.id).delete();
+        });
+    });
+}
+
+document.getElementById("todo-add-btn").addEventListener("click", function() { todoModal.classList.add("open"); });
+document.getElementById("todo-modal-close").addEventListener("click", function() { todoModal.classList.remove("open"); });
+document.getElementById("todo-cancel-btn").addEventListener("click", function() { todoModal.classList.remove("open"); });
+todoModal.addEventListener("click", function(e) { if (e.target === todoModal) todoModal.classList.remove("open"); });
+
+todoForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const title = document.getElementById("todo-title").value.trim();
+    db.collection("todos").add({
+        title: title,
+        done: false,
+        ownerUid: auth.currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+        showToast("추가했어요");
+        todoModal.classList.remove("open");
+        todoForm.reset();
+    }).catch(function(err) {
+        showToast("추가에 실패했어요: " + err.message);
+    });
+});
+
+renderTodoList();
+whenAuthReady(function() {
+    db.collection("todos").orderBy("createdAt", "desc").onSnapshot(function(snapshot) {
+        allTodos = snapshot.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); });
+        renderTodoList();
+    }, function(err) { console.error("할일 구독 실패:", err.message); });
 });
 
 // ✨ 누군가 아바타를 바꾸면 이름 옆 이모지도 바로 갱신

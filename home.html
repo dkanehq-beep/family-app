@@ -50,6 +50,8 @@
 
     <div class="section-block" id="event-wish-section" style="display:none;"></div>
 
+    <div class="section-block" id="memory-section" style="display:none;"></div>
+
     <div class="section-block">
         <div class="section-header">
             <h3 class="section-label">우리 가족 현황</h3>
@@ -79,6 +81,14 @@
             <button class="section-add-btn" id="letter-add-btn">+ 편지 쓰기</button>
         </div>
         <div id="letter-list"></div>
+    </div>
+
+    <div class="section-block">
+        <div class="section-header">
+            <h3 class="section-label">장보기 · 할일</h3>
+            <button class="section-add-btn" id="todo-add-btn">+ 추가</button>
+        </div>
+        <div id="todo-list"></div>
     </div>
 
     <div class="section-block">
@@ -187,6 +197,24 @@
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" id="letter-cancel-btn">취소</button>
                 <button type="submit" class="btn-primary">편지 남기기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 장보기/할일 추가 모달 -->
+<div class="modal-overlay" id="todo-modal">
+    <div class="modal-box">
+        <button class="modal-close-x" id="todo-modal-close">✕</button>
+        <h3>장보기 · 할일 추가</h3>
+        <form id="todo-form">
+            <div class="form-group">
+                <label>내용</label>
+                <input type="text" id="todo-title" placeholder="예: 우유 사오기, 분리수거" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="todo-cancel-btn">취소</button>
+                <button type="submit" class="btn-primary">추가하기</button>
             </div>
         </form>
     </div>
